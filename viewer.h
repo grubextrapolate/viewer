@@ -16,13 +16,18 @@
 #define FALSE 0
 #endif
 
+#define MAJOR 0
+#define MINOR 6
+#define PATCH 1
+
 #define winHeight 400 /* window width */
 #define winWidth 400  /* window height */
 
 #define LARGE_NUM 9999999999
 #define STRING_SIZE 132
 
-#define DEBUG
+/* uncomment to show debugging output */
+/* #define DEBUG */
 
 /* defines a RGB color data type*/
 typedef struct {
@@ -33,9 +38,15 @@ typedef struct {
 
 /* defines a texture data type */
 typedef struct {
-   COLOR **tex;
+   GLubyte *tex;
    int width;
    int height;
+   int x;
+   int y;
+   int x1;
+   int x2;
+   int y1;
+   int y2;
 } TEXTURE;
 
 float pi = 3.14159265358979; /* pi, obviously */

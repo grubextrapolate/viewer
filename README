@@ -1,0 +1,82 @@
+building viewer:
+----------------
+
+simply typing 'make' should build the program. this uses a roughly
+hacked together script called 'glcc' that i've used to compile opengl
+applications on several architectures here at the university of
+minnesota. at some point i'll probably move to a solution involving
+autoconf, but this was the easiest.
+
+usage:
+------
+
+viewer [basename]
+       will read basename-l.ppm and basename-r.ppm as left and right
+images
+       and will write basename-leftcrop.ppm, basename-rightcrop.ppm,
+       and basename-pair.ppm
+viewer [options]
+       -i leftinfile.ppm rightinfile.ppm
+       -v fullinfile.ppm
+       -o fulloutfile.ppm [default = fullout.ppm]
+       -l leftoutfile.ppm [default = leftout.ppm]
+       -r rightoutfile.ppm [default = rightout.ppm]
+
+must contain either the -i or -v options or only basename.
+if the -o, -l, or -r options are omitted default will be used
+
+commands within program:
+cursor keys             move left image by 1 pixel
+cursor keys+shift       move right image by 1 pixel
+cursor keys+alt         move both images by 1 pixel
+cursor keys+ctrl        move left image by 10 pixels
+cursor keys+shift+ctrl  move right image by 10 pixels
+cursor keys+shift+alt   move both images by 10 pixels
+esc or q                quit
+enter                   write images
+
+enter+shift             write images and quit
+
+
+program execution examples:
+---------------------------
+
+	viewer pair0611b
+
+will read pair0611b-l.ppm as the left image and pair0611b-r.ppm as the
+right image. when the image is cropped (by pressing enter) the files
+pair0611b-leftcrop.ppm, pair0611b-rightcrop.ppm, and pair0611b-pair.ppm
+will be written.
+
+	viewer -i pair0611b-l.ppm pair0611b-r.ppm
+
+is equivalent to the above command in that it will read the same two
+files, however the default output filenames will be leftout.ppm,
+rightout.ppm, and fullout.ppm rather than the above.
+
+	viewer -i pair0611b-l.ppm pair0611b-r.ppm -l cropleft.ppm \
+               -r cropright.ppm -o stereoimage.ppm
+
+this again reads the same two images, however rather than using the
+default output filenames it will write the cropped and stereo images to
+the specified filenames. if any of the output options are omitted the
+default will be used.
+
+	viewer -v pair0611b-pair.ppm
+
+this will simply allow you to view the cropped and aligned stereo pair
+which was created in the first example above.
+
+author contact:
+---------------
+
+questions/comments/suggestions welcome.
+
+Russ Burdick
+<wburdick@cs.umn.edu>
+
+license:
+--------
+
+this software is covered under the GNU Public License as outlined in the
+COPYING file included with this distribution.

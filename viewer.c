@@ -3,15 +3,16 @@
 #define POSITION 0
 #define VIEWER 1
 
+#define RGB 3
+#define RGBA 4
+
 /*
  * some function prototypes.
  */
 void displayFunc(void); /* the display function */
 void displayFunc2(void); /* the display function (for viewer) */
 void resizeFunc(int, int); /* the resize function */
-void resizeFunc2(int, int); /* the resize function (for viewer) */
 void menuFunc(int); /* the menu function */
-void menuFunc2(int); /* the menu function (for viewer) */
 void keyboardFunc(unsigned char, int, int);
 void keyboardFunc2(unsigned char, int, int); /* (for viewer) */
 void specialFunc(int, int, int);
@@ -20,34 +21,38 @@ TEXTURE *read_texture(char *);
 void write_ppm(char *, COLOR ***, int, int);
 void write_texture(char *, TEXTURE *);
 void write_cropped_texture(char *, TEXTURE *, int, int, int, int);
-void writePixel(int, int, COLOR *);
+void calcWindow(TEXTURE *);
 
 /*
  * global variables
  */
 
-int first_time = TRUE;
+int first_time = TRUE; /* first time we've called display? */
+
+/* screen dimensions (dimensions of one 'eye', so half of desktop) */
 int screen_x = 1024;
 int screen_y = 768;
+
+/*
+ * right hand image can be 'offset' from top left corner of screen. was
+ * used when second screen was offset in y direction, unused now. left
+ * in for convenience and backwards compatibility.
+ */
 int offset_x = 0;
 int offset_y = 0;
 
+/* left image, right image, and 'full' (combined left+right images) */
 TEXTURE *left = NULL;
-int left_win = 0;
-int left_x = 0;
-int left_y = 0;
-
-int right_win = 0;
 TEXTURE *right = NULL;
-int right_x = 0;
-int right_y = 0;
-
 TEXTURE *full = NULL;
 
+/* output filenames */
 char *fullOutfile = NULL;
 char *leftOutfile = NULL;
 char *rightOutfile = NULL;
+char *basename = NULL;
 
+/* either in POSITION mode or in VIEWER mode */
 int mode = POSITION;
 
 /*
@@ -58,12 +63,13 @@ int mode = POSITION;
 int main(int argc, char **argv) {
 
    int mainmenu; /* menu id */
+   int i, j, k;
 
    processArgs(argc, argv);
 
    glutInit(&argc, argv);
 
-   glutInitDisplayMode(GLUT_RGB|GLUT_SINGLE);
+   glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE);
 
    if (mode == POSITION) {
 
@@ -72,18 +78,43 @@ int main(int argc, char **argv) {
 
       debug("screen_x = %d, screen_y = %d\n", screen_x, screen_y);
 
-      left_x = (screen_x - left->width)/2;
-      left_y = (screen_y - left->height)/2;
+      left->x = (screen_x - left->width)/2;
+      left->y = (screen_y - left->height)/2;
+      calcWindow(left);
 
-      /* left window */
-      glutInitWindowPosition(left_x, left_y);
-      glutInitWindowSize(left->width, left->height);
-      left_win = glutCreateWindow("stereo viewer: left image");
+      right->x = (screen_x - right->width)/2;
+      right->y = (screen_y - right->height)/2;
+      calcWindow(right);
+
+      full = (TEXTURE *)malloc(sizeof(TEXTURE));
+      if (full == NULL) die("keyboardFunc: malloc failure\n");
+
+      full->width = screen_x*2;
+      full->height = screen_y;
+      full->tex = (GLubyte *)malloc(full->width*full->height*RGBA);
+      if (full->tex == NULL) die("keyboardFunc: malloc failure\n");
+
+      for (i = 0; i < full->height; i++) {
+         for (j = 0; j < full->width; j++) {
+            for (k = 0; k < RGBA; k++) {
+               *(full->tex + (RGBA*((full->height-1-i)*
+                  full->width+j)+k)) = (GLubyte) 0;
+            }
+         }
+      }
+
+      /* window */
+      glutInitWindowPosition(0, 0);
+      glutInitWindowSize(screen_x*2, screen_y);
+      glutCreateWindow("stereo viewer");
 
       glutDisplayFunc(displayFunc);
       glutReshapeFunc(resizeFunc);
       glutKeyboardFunc(keyboardFunc);
       glutSpecialFunc(specialFunc);
+      glClearColor(0.0, 0.0, 0.0, 0.0);
+      glShadeModel(GL_FLAT);
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
       /* menu */
       mainmenu = glutCreateMenu(menuFunc);
@@ -91,30 +122,18 @@ int main(int argc, char **argv) {
 
       glutAttachMenu(GLUT_RIGHT_BUTTON);
 
-      right_x = (screen_x - right->width)/2;
-      right_y = (screen_y - right->height)/2;
+   } else { /* mode == VIEWER */
 
-      /* right window */
-      glutInitWindowPosition(right_x + screen_x + offset_x, right_y + offset_y);
-      glutInitWindowSize(right->width, right->height);
-      right_win = glutCreateWindow("stereo viewer: right image");
-
-      glutDisplayFunc(displayFunc);
-      glutReshapeFunc(resizeFunc);
-      glutKeyboardFunc(keyboardFunc);
-      glutSpecialFunc(specialFunc);
-
-   } else {
       glutInitWindowPosition(0, 0);
       glutInitWindowSize(full->width, full->height);
-      left_win = glutCreateWindow("stereo viewer");
+      glutCreateWindow("stereo viewer");
 
       glutDisplayFunc(displayFunc2);
-      glutReshapeFunc(resizeFunc2);
+      glutReshapeFunc(resizeFunc);
       glutKeyboardFunc(keyboardFunc2);
 
       /* menu */
-      mainmenu = glutCreateMenu(menuFunc2);
+      mainmenu = glutCreateMenu(menuFunc);
       glutAddMenuEntry("quit",99);
 
       glutAttachMenu(GLUT_RIGHT_BUTTON);
@@ -127,29 +146,45 @@ int main(int argc, char **argv) {
 
 }
 
+/*
+ * displays a message about how to use the program and the commands
+ * available in the user interface
+ */
 void showUsage() {
 
-   printf("stereo pair viewer/aligner. usage:\n");
+   printf("stereo pair viewer/aligner v%d.%d.%d.\n", MAJOR, MINOR, PATCH);
+   printf("usage:\n");
+   printf("viewer [basename]\n");
+   printf("       will read basename-l.ppm and basename-r.ppm as left and right images\n");
+   printf("       and will write basename-leftcrop.ppm, basename-rightcrop.ppm,\n");
+   printf("       and basename-pair.ppm\n");
    printf("viewer [options]\n");
    printf("       -i leftinfile.ppm rightinfile.ppm\n");
    printf("       -v fullinfile.ppm\n");
    printf("       -o fulloutfile.ppm [default = fullout.ppm]\n");
    printf("       -l leftoutfile.ppm [default = leftout.ppm]\n");
    printf("       -r rightoutfile.ppm [default = rightout.ppm]\n");
-   printf("\nmust contain either the -i or -v options.\n");
+   printf("\nmust contain either the -i or -v options or only basename.\n");
    printf("if the -o, -l, or -r options are omitted default will be used\n");
    printf("\ncommands within program:\n");
    printf("cursor keys             move left image by 1 pixel\n");
    printf("cursor keys+shift       move right image by 1 pixel\n");
+   printf("cursor keys+alt         move both images by 1 pixel\n");
    printf("cursor keys+ctrl        move left image by 10 pixels\n");
    printf("cursor keys+shift+ctrl  move right image by 10 pixels\n");
+   printf("cursor keys+shift+alt   move both images by 10 pixels\n");
    printf("esc or q                quit\n");
    printf("enter                   write images\n\n");
+   printf("enter+shift             write images and quit\n\n");
 }
 
+/*
+ * processes command line arguments.
+ */
 void processArgs(int argc, char **argv) {
 
    int i = 1;
+   char buf[2048];
 
    if (argc == 1) { /* display usage */
       showUsage();
@@ -201,6 +236,14 @@ void processArgs(int argc, char **argv) {
             showUsage();
             exit(-1);
          }
+      } else if (argc == 2) {
+         basename = argv[1];
+         strcpy(buf, argv[1]);
+         strcat(buf, "-l.ppm");
+         left = read_texture(buf);
+         strcpy(buf, argv[1]);
+         strcat(buf, "-r.ppm");
+         right = read_texture(buf);
       } else {
          showUsage();
       }
@@ -209,65 +252,87 @@ void processArgs(int argc, char **argv) {
 
 }
 
+/*
+ * display function for POSITION mode draws the two images (on a black
+ * background if they are smaller than the screen size). uses double
+ * buffering to avoid flicker of display
+ */
 void displayFunc(void) {
-   int i, j;
 
-   if (first_time) {
-      glutSetWindow(left_win);
-      glutPositionWindow(left_x, left_y);
-      glutSetWindow(right_win);
-      glutPositionWindow(right_x + screen_x + offset_x, right_y + offset_y);
-      first_time = FALSE;
-   }
-
-   glutSetWindow(left_win);
-   for (i = 0; i < left->width; i++) {
-      for (j = 0; j < left->height; j++) {
-         glBegin(GL_POINTS);
-            glColor3f(left->tex[j][i].r, left->tex[j][i].g, 
-                      left->tex[j][i].b);
-            glVertex2i(i, left->height - j);
-         glEnd();
-      }
-   }
-
-   glutSetWindow(right_win);
-   for (i = 0; i < right->width; i++) {
-      for (j = 0; j < right->height; j++) {
-         glBegin(GL_POINTS);
-            glColor3f(right->tex[j][i].r, right->tex[j][i].g, 
-                      right->tex[j][i].b);
-            glVertex2i(i, right->height - j);
-         glEnd();
-      }
-   }
-   glFlush();
-}
-
-void displayFunc2(void) {
-   int i, j;
+   int rx, ry;
+   int i, h, w, r, off;
 
    if (first_time) {
       glutPositionWindow(0, 0);
       first_time = FALSE;
    }
 
-   for (i = 0; i < full->width; i++) {
-      for (j = 0; j < full->height; j++) {
-         glBegin(GL_POINTS);
-            glColor3f(full->tex[j][i].r, full->tex[j][i].g, 
-                      full->tex[j][i].b);
-            glVertex2i(i, full->height - j);
-         glEnd();
-      }
+   glClear(GL_COLOR_BUFFER_BIT);
+
+   if (left->x < 0) rx = 0;
+   else rx = left->x;
+   if (left->y < 0) ry = 0;
+   else ry = left->y;
+
+   w = left->x2 - left->x1;
+   h = left->y2 - left->y1;
+   r = left->width*RGBA;
+   off = RGBA*((left->height-1-left->y1)*left->width+left->x1);
+
+   for (i = 0; i < h; i++) {
+      glRasterPos2i(rx, screen_y - (ry+i));
+      glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+                   left->tex+off);
+      off -= r;
    }
 
-   glFlush();
+   if (right->x < 0) rx = 0;
+   else rx = right->x;
+   if (right->y < 0) ry = 0;
+   else ry = right->y;
+
+   w = right->x2 - right->x1;
+   h = right->y2 - right->y1;
+   r = right->width*RGBA;
+   off = RGBA*((right->height-1-right->y1)*right->width+right->x1);
+
+   for (i = 0; i < h; i++) {
+      glRasterPos2i(rx+screen_x, screen_y - (ry+i));
+      glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+                   right->tex+off);
+      off -= r;
+   }
+
+   glutSwapBuffers();
 }
 
+/*
+ * display function for VIEWER mode. draws the full stereo image across
+ * both desktops (both eyes). uses double buffering for drawing.
+ */
+void displayFunc2(void) {
+
+   if (first_time) {
+      glutPositionWindow(0, 0);
+      first_time = FALSE;
+   }
+
+   glClear(GL_COLOR_BUFFER_BIT);
+   glRasterPos2i(0,0);
+   glDrawPixels(full->width, full->height, GL_RGBA, GL_UNSIGNED_BYTE,
+                full->tex);
+
+   glutSwapBuffers();
+}
+
+/*
+ * keyboard function for POSITION mode. handles cropping of images and
+ * writing of cropped images to files and quitting from program.
+ * movement (via cursor keys) is done in specialFunc.
+ */
 void keyboardFunc(unsigned char key, int x, int y) {
 
-   int crop_x1, crop_x2, crop_y1, crop_y2, i, j;
+   int crop_x1, crop_x2, crop_y1, crop_y2, i, j, k;
    int start_x, start_y;
 
    debug("keyboardFunc: key is (ascii) %d\n", key);
@@ -276,23 +341,16 @@ void keyboardFunc(unsigned char key, int x, int y) {
       case 13:
          debug("return key pressed.\n");
 
-         glutSetWindow(left_win);
-         left_x = glutGet(GLUT_WINDOW_X);
-         left_y = glutGet(GLUT_WINDOW_Y);
-         glutSetWindow(right_win);
-         right_x = glutGet(GLUT_WINDOW_X) - screen_x - offset_x;
-         right_y = glutGet(GLUT_WINDOW_Y) - offset_y;
-
          debug("left image is %dx%d at %dx%d\n",
-               left->width, left->height, left_x, left_y);
+               left->width, left->height, left->x, left->y);
          debug("right image is %dx%d at %dx%d, offset by %dx%d\n",
-               right->width, right->height, right_x, right_y, screen_x +
+               right->width, right->height, right->x, right->y, screen_x +
                offset_x, offset_y);
 
-         crop_x1 = max(left_x, right_x);
-         crop_x2 = min(left_x + left->width, right_x + right->width);
-         crop_y1 = max(left_y, right_y);
-         crop_y2 = min(left_y + left->height, right_y + right->height);
+         crop_x1 = max(left->x, right->x);
+         crop_x2 = min(left->x + left->width, right->x + right->width);
+         crop_y1 = max(left->y, right->y);
+         crop_y2 = min(left->y + left->height, right->y + right->height);
 
          debug("crop_x1 = %d, crop_x2 = %d, crop_y1 = %d, crop_y2 = %d\n",
                crop_x1, crop_x2, crop_y1, crop_y2);
@@ -310,19 +368,15 @@ void keyboardFunc(unsigned char key, int x, int y) {
 
          full->width = screen_x*2;
          full->height = screen_y;
-         full->tex = (COLOR **)malloc(sizeof(COLOR *)*screen_y);
+         full->tex = (GLubyte *)malloc(full->width*full->height*RGBA);
          if (full->tex == NULL) die("keyboardFunc: malloc failure\n");
 
-         for (i = 0; i < screen_y; i++) {
-            full->tex[i] = (COLOR *)malloc(sizeof(COLOR)*screen_x*2);
-            if (full->tex[i] == NULL) die("keyboardFunc: malloc failure\n");
-         }
-
-         for (i = 0; i < screen_y; i++) {
-            for (j = 0; j < screen_x*2; j++) {
-               full->tex[i][j].r = 0;
-               full->tex[i][j].g = 0;
-               full->tex[i][j].b = 0;
+         for (i = 0; i < full->height; i++) {
+            for (j = 0; j < full->width; j++) {
+               for (k = 0; k < RGBA; k++) {
+                  *(full->tex + (RGBA*((full->height-1-i)*
+                     full->width+j)+k)) = (GLubyte) 0;
+               }
             }
          }
 
@@ -332,20 +386,34 @@ void keyboardFunc(unsigned char key, int x, int y) {
          /* calc crop */
          for (i = crop_y1; i < crop_y2; i++) {
             for (j = crop_x1; j < crop_x2; j++) {
-               full->tex[i+start_y][j+start_x].r = 
-                        left->tex[i-left_y][j-left_x].r;
-               full->tex[i+start_y][j+start_x].g = 
-                        left->tex[i-left_y][j-left_x].g;
-               full->tex[i+start_y][j+start_x].b = 
-                        left->tex[i-left_y][j-left_x].b;
+               for (k = 0; k < RGBA; k++) {
 
-               full->tex[i+start_y][j+start_x+screen_x].r =
-                        right->tex[i-right_y][j-right_x].r;
-               full->tex[i+start_y][j+start_x+screen_x].g =
-                        right->tex[i-right_y][j-right_x].g;
-               full->tex[i+start_y][j+start_x+screen_x].b =
-                        right->tex[i-right_y][j-right_x].b;
+                  *(full->tex +(RGBA*((full->height-1-i-start_y)*
+                     full->width+j+start_x)+k)) =
+                     *(left->tex + (RGBA*((left->height-1-i+left->y)*
+                     left->width+j-left->x)+k));
+
+                  *(full->tex +(RGBA*((full->height-1-i-start_y)*
+                     full->width+j+start_x+screen_x)+k)) =
+                     *(right->tex + (RGBA*((right->height-1-i+right->y)*
+                     right->width+j-right->x)+k));
+
+               }
             }
+         }
+
+         if (basename != NULL) {
+            fullOutfile = (char *)malloc(sizeof(char)*(strlen(basename)+10));
+            strcpy(fullOutfile, basename);
+            strcat(fullOutfile, "-pair.ppm");
+
+            leftOutfile = (char *)malloc(sizeof(char)*(strlen(basename)+14));
+            strcpy(leftOutfile, basename);
+            strcat(leftOutfile, "-leftcrop.ppm");
+
+            rightOutfile = (char *)malloc(sizeof(char)*(strlen(basename)+15));
+            strcpy(rightOutfile, basename);
+            strcat(rightOutfile, "-rightcrop.ppm");
          }
 
          /* write cropped images to file(s) */
@@ -355,22 +423,24 @@ void keyboardFunc(unsigned char key, int x, int y) {
             write_texture("fullout.ppm", full);
 
          if (leftOutfile != NULL)
-            write_cropped_texture(leftOutfile, left, crop_x1 - left_x, 
-                                  crop_x2 - left_x,
-                                  crop_y1 - left_y, crop_y2 - left_y);
+            write_cropped_texture(leftOutfile, left, crop_x1 - left->x, 
+                                  crop_x2 - left->x,
+                                  crop_y1 - left->y, crop_y2 - left->y);
          else
-            write_cropped_texture("leftout.ppm", left, crop_x1 - left_x, 
-                                  crop_x2 - left_x,
-                                  crop_y1 - left_y, crop_y2 - left_y);
+            write_cropped_texture("leftout.ppm", left, crop_x1 - left->x, 
+                                  crop_x2 - left->x,
+                                  crop_y1 - left->y, crop_y2 - left->y);
 
          if (rightOutfile != NULL)
-            write_cropped_texture(rightOutfile, right, crop_x1-right_x,
-                                  crop_x2-right_x, crop_y1-right_y,
-                                  crop_y2-right_y);
+            write_cropped_texture(rightOutfile, right, crop_x1-right->x,
+                                  crop_x2-right->x, crop_y1-right->y,
+                                  crop_y2-right->y);
          else
-            write_cropped_texture("rightout.ppm", right, crop_x1-right_x,
-                                  crop_x2-right_x, crop_y1-right_y,
-                                  crop_y2-right_y);
+            write_cropped_texture("rightout.ppm", right, crop_x1-right->x,
+                                  crop_x2-right->x, crop_y1-right->y,
+                                  crop_y2-right->y);
+
+         if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) exit(0);
 
          break;
 
@@ -383,9 +453,13 @@ void keyboardFunc(unsigned char key, int x, int y) {
       default:
          break;
    }
-
 }
 
+/*
+ * keyboard function for VIEWER mode. since the stereo image should be
+ * exactly the same size as the desktop there should be no need for
+ * movement and the only key it watches for is quit.
+ */
 void keyboardFunc2(unsigned char key, int x, int y) {
 
    debug("keyboardFunc2: key is (ascii) %d\n", key);
@@ -403,119 +477,126 @@ void keyboardFunc2(unsigned char key, int x, int y) {
 
 }
 
-
+/*
+ * function to handle movement of windows via cursor keys.
+ */
 void specialFunc(int key, int x, int y) {
 
    debug("specialFunc: key is %d\n", key);
-
-   if ((key == GLUT_KEY_LEFT) || (key == GLUT_KEY_RIGHT) ||
-       (key == GLUT_KEY_DOWN) || (key == GLUT_KEY_UP)) {
-      glutSetWindow(left_win);
-      left_x = glutGet(GLUT_WINDOW_X);
-      left_y = glutGet(GLUT_WINDOW_Y);
-      glutSetWindow(right_win);
-      right_x = glutGet(GLUT_WINDOW_X) - screen_x - offset_x;
-      right_y = glutGet(GLUT_WINDOW_Y) - offset_y;
-   }
 
    switch(key) {
       case GLUT_KEY_LEFT:
          if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) {
             if (glutGetModifiers() & GLUT_ACTIVE_CTRL)
-               right_x -= 10;
+               right->x -= 10;
             else
-               right_x--;
+               right->x--;
 
-            glutSetWindow(right_win);
-            glutPositionWindow(right_x + screen_x + offset_x, right_y + offset_y);
+         } else if (glutGetModifiers() & GLUT_ACTIVE_ALT) {
+            if (glutGetModifiers() & GLUT_ACTIVE_CTRL) {
+               left->x -= 10;
+               right->x -= 10;
+            } else {
+               left->x--;
+               right->x--;
+            }
          } else {
             if (glutGetModifiers() & GLUT_ACTIVE_CTRL)
-               left_x -= 10;
+               left->x -= 10;
             else
-               left_x--;
-            glutSetWindow(left_win);
-            glutPositionWindow(left_x, left_y);
+               left->x--;
          }
          break;
       case GLUT_KEY_RIGHT:
          if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) {
             if (glutGetModifiers() & GLUT_ACTIVE_CTRL)
-               right_x += 10;
+               right->x += 10;
             else
-               right_x++;
-            glutSetWindow(right_win);
-            glutPositionWindow(right_x + screen_x + offset_x, right_y + offset_y);
+               right->x++;
+         } else if (glutGetModifiers() & GLUT_ACTIVE_ALT) {
+            if (glutGetModifiers() & GLUT_ACTIVE_CTRL) {
+               left->x += 10;
+               right->x += 10;
+            } else {
+               left->x++;
+               right->x++;
+            }
          } else {
             if (glutGetModifiers() & GLUT_ACTIVE_CTRL)
-               left_x += 10;
+               left->x += 10;
             else
-               left_x++;
+               left->x++;
 
-            glutSetWindow(left_win);
-            glutPositionWindow(left_x, left_y);
          }
          break;
       case GLUT_KEY_UP:
          if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) {
             if (glutGetModifiers() & GLUT_ACTIVE_CTRL)
-               right_y -= 10;
+               right->y -= 10;
             else
-               right_y--;
-            glutSetWindow(right_win);
-            glutPositionWindow(right_x + screen_x + offset_x, right_y + offset_y);
+               right->y--;
+         } else if (glutGetModifiers() & GLUT_ACTIVE_ALT) {
+            if (glutGetModifiers() & GLUT_ACTIVE_CTRL) {
+               left->y -= 10;
+               right->y -= 10;
+            }else {
+               left->y--;
+               right->y--;
+            }
          } else {
             if (glutGetModifiers() & GLUT_ACTIVE_CTRL)
-               left_y -= 10;
+               left->y -= 10;
             else
-               left_y--;
+               left->y--;
 
-            glutSetWindow(left_win);
-            glutPositionWindow(left_x, left_y);
          }
          break;
       case GLUT_KEY_DOWN:
          if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) {
             if (glutGetModifiers() & GLUT_ACTIVE_CTRL)
-               right_y += 10;
+               right->y += 10;
             else
-               right_y++;
-            glutSetWindow(right_win);
-            glutPositionWindow(right_x + screen_x + offset_x, right_y + offset_y);
+               right->y++;
+         } else if (glutGetModifiers() & GLUT_ACTIVE_ALT) {
+            if (glutGetModifiers() & GLUT_ACTIVE_CTRL) {
+               left->y += 10;
+               right->y += 10;
+            } else {
+               right->y++;
+               right->y++;
+            }
          } else {
             if (glutGetModifiers() & GLUT_ACTIVE_CTRL)
-               left_y += 10;
+               left->y += 10;
             else
-               left_y++;
+               left->y++;
 
-            glutSetWindow(left_win);
-            glutPositionWindow(left_x, left_y);
          }
          break;
       default:
          break;
    }
 
-}
+   if ((key == GLUT_KEY_LEFT) || (key == GLUT_KEY_RIGHT) ||
+       (key == GLUT_KEY_DOWN) || (key == GLUT_KEY_UP)) {
+      if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) {
+         calcWindow(right);
+      } else if (glutGetModifiers() & GLUT_ACTIVE_ALT) {
+         calcWindow(left);
+         calcWindow(right);
+      } else {
+         calcWindow(left);
+      }
 
-/*
- * the menu handler. when a menu item is clicked this function controls
- * what happens.
- */
-void menuFunc(int item) {
-
-   switch(item) {
-      case 99:
-         exit(0);
-         break;
-      default:
+      glutPostRedisplay();
    }
 }
 
 /*
  * the menu handler. when a menu item is clicked this function controls
- * what happens.
+ * what happens. only have quit menu at this time.
  */
-void menuFunc2(int item) {
+void menuFunc(int item) {
 
    switch(item) {
       case 99:
@@ -531,28 +612,6 @@ void menuFunc2(int item) {
  */
 void resizeFunc(int height, int width) {
 
-   glutSetWindow(left_win);
-   glutReshapeWindow(left->width, left->height);
-   glViewport(0, 0, left->width, left->height);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   gluOrtho2D(0, left->width, 0, left->height);
-
-   glutSetWindow(right_win);
-   glutReshapeWindow(right->width, right->height);
-   glViewport(0, 0, right->width, right->height);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   gluOrtho2D(0, right->width, 0, right->height);
-
-}
-
-/*
- * resize callback function. this will simply force the window to go back
- * to its original size if the user tries to resize it.
- */
-void resizeFunc2(int height, int width) {
-
    glutReshapeWindow(full->width, full->height);
    glViewport(0, 0, full->width, full->height);
    glMatrixMode(GL_PROJECTION);
@@ -562,359 +621,22 @@ void resizeFunc2(int height, int width) {
 }
 
 /*
- * draw a point of a given size. the size is a dumb 'block' size, so size
- * of 1 prints one pixel, size of 3 prints a 3x3 block centered at the
- * given point, etc. note that sizes which are even will not center
- * properly. color is presently ignored.
+ * based on read_texture function provided in CSCI5107. modified to read
+ * both raw and ascii ppm files. reads from the filename provided and
+ * returns a pointer to a TEXTURE object containing the image and info
+ * about it.
  */
-void writePixel(int x, int y,  COLOR *color) {
-
-   glBegin(GL_POINTS);
-      glColor3f(color->r, color->g, color->b);
-      glVertex2i(x, y);
-   glEnd();
-
-   glFlush();
-
-}
-
-/*
- * draws a dashed line between the two given points using the midpoint
- * algorithm.
- */
-void drawDashedLine(int x1, int y1, int x2, int y2, COLOR *color1,
-                    COLOR *color2) {
-
-   int max = 10;
-   int count = 0;
-   int first = TRUE;
-   int dx, dy, d, incrE, incrNE, x, y;
-   int incrN, incrW, incrS, incrNW, incrSW, incrSE;
-   float m, m2;
-   COLOR *color = color1;
-
-   m = ((float)(y2 - y1))/(x2 - x1);  /* slope */
-   m2 = ((float)(x2 - x1))/(y2 - y1); /* inverse slope */
-
-   if ((m >= 0) && (m <= 1)) {
-
-      if (x2 >= x1) { /* 0 - 45 degrees */
-
-         dx = x2 - x1;
-         dy = y2 - y1;
-         d = 2*dy - dx;
-         incrE = 2*dy;
-         incrNE = 2*(dy - dx);
-         x = x1;
-         y = y1;
-
-         writePixel(x, y, color);
-
-         for (x = x1+1; x <= x2; x++) {
-
-            if (count > max) { /* swap color */
-               count = 0;
-               if (first == TRUE) {
-                  color = color2;
-                  first = FALSE;
-               } else {
-                  color = color1;
-                  first = TRUE;
-               }
-            } else {
-               count++;
-            }
-
-            if (d <= 0) { /* choose E */
-               d += incrE;
-            } else { /* choose NE */
-               d += incrNE;
-               y++;
-            }
-            writePixel(x, y, color);
-         }
-      } else { /* 180 - 225 */
-
-         dx = x2 - x1;
-         dy = y2 - y1;
-         d = 2*dy - dx;
-         incrW = 2*dy;
-         incrSW = 2*(dy - dx);
-         x = x1;
-         y = y1;
-
-         writePixel(x, y, color);
-
-         for (x = x1-1; x >= x2; x--) {
-
-            if (count > max) { /* swap color */
-               count = 0;
-               if (first == TRUE) {
-                  color = color2;
-                  first = FALSE;
-               } else {
-                  color = color1;
-                  first = TRUE;
-               }
-            } else {
-               count++;
-            }
-
-            if (d <= 0) { /* choose W */
-               d -= incrW;
-            } else { /* choose SW */
-               d -= incrSW;
-               y--;
-            }
-            writePixel(x, y, color);
-         }
-      }
-   } else if ((m2 >= 0) && (m2 <= 1)) {
-
-      if ((x2 >= x1) && (y2 > y1)) { /* 45 - 90 degrees */
-
-         dx = x2 - x1;
-         dy = y2 - y1;
-         d = 2*dx - dy;
-         incrN = 2*dx;
-         incrNE = 2*(dx - dy);
-         x = x1;
-         y = y1;
-
-         writePixel(x, y, color);
-
-         for (y = y1+1; y <= y2; y++) {
-
-            if (count > max) { /* swap color */
-               count = 0;
-               if (first == TRUE) {
-                  color = color2;
-                  first = FALSE;
-               } else {
-                  color = color1;
-                  first = TRUE;
-               }
-            } else {
-               count++;
-            }
-
-            if (d <= 0) { /* choose N */
-               d += incrN;
-            } else { /* choose NE */
-               d += incrNE;
-               x++;
-            }
-            writePixel(x, y, color);
-         }
-      } else { /* 225 - 270 */
-
-         dx = x2 - x1;
-         dy = y2 - y1;
-         d = -2*dx + dy;
-         incrS = 2*dx;
-         incrSW = 2*(dx - dy);
-         x = x1;
-         y = y1;
-
-         writePixel(x, y, color);
-
-         for (y = y1-1; y >= y2; y--) {
-
-            if (count > max) { /* swap color */
-               count = 0;
-               if (first == TRUE) {
-                  color = color2;
-                  first = FALSE;
-               } else {
-                  color = color1;
-                  first = TRUE;
-               }
-            } else {
-               count++;
-            }
-
-            if (d <= 0) { /* choose S */
-               d -= incrS;
-            } else { /* choose SW */
-               d -= incrSW;
-               x--;
-            }
-            writePixel(x, y, color);
-         }
-      }
-   } else if ((m <= 0) && (m >= -1)) {
-
-      if (x2 <= x1) { /* 135 - 180 degrees */
-
-         dx = x2 - x1;
-         dy = y2 - y1;
-         d = 2*dy - dx;
-         incrW = 2*dy;
-         incrNW = 2*(dy + dx);
-         x = x1;
-         y = y1;
-
-         writePixel(x, y, color);
-
-         for (x = x1-1; x >= x2; x--) {
-
-            if (count > max) { /* swap color */
-               count = 0;
-               if (first == TRUE) {
-                  color = color2;
-                  first = FALSE;
-               } else {
-                  color = color1;
-                  first = TRUE;
-               }
-            } else {
-               count++;
-            }
-
-            if (d <= 0) { /* choose W */
-               d += incrW;
-            } else { /* choose NW */
-               d += incrNW;
-               y++;
-            }
-            writePixel(x, y, color);
-         }
-      } else { /* 315 - 360 */
-
-         dx = x2 - x1;
-         dy = y2 - y1;
-         d = 2*dy - dx;
-         incrE = 2*dy;
-         incrSE = 2*(-dy - dx);
-         x = x1;
-         y = y1;
-
-         writePixel(x, y, color);
-
-         for (x = x1+1; x <= x2; x++) {
-
-            if (count > max) { /* swap color */
-               count = 0;
-               if (first == TRUE) {
-                  color = color2;
-                  first = FALSE;
-               } else {
-                  color = color1;
-                  first = TRUE;
-               }
-            } else {
-               count++;
-            }
-
-            if (d <= 0) { /* choose E */
-               d -= incrE;
-            } else { /* choose SE */
-               d += incrSE;
-               y--;
-            }
-            writePixel(x, y, color);
-         }
-      }
-   } else if ((m2 <= 0) && (m2 >= -1)) {
-
-      if (x2 <= x1) { /* 90 - 135 degrees */
-
-         dx = x2 - x1;
-         dy = y2 - y1;
-         d = 2*dx - dy;
-         incrN = 2*dx;
-         incrNW = 2*(-dx - dy);
-         x = x1;
-         y = y1;
-
-         writePixel(x, y, color);
-
-         for (y = y1+1; y <= y2; y++) {
-
-            if (count > max) { /* swap color */
-               count = 0;
-               if (first == TRUE) {
-                  color = color2;
-                  first = FALSE;
-               } else {
-                  color = color1;
-                  first = TRUE;
-               }
-            } else {
-               count++;
-            }
-
-            if (d <= 0) { /* choose N */
-               d -= incrN;
-            } else { /* choose NW */
-               d += incrNW;
-               x--;
-            }
-            writePixel(x, y, color);
-         }
-      } else { /* 270 - 315 */
-
-         dx = x2 - x1;
-         dy = y2 - y1;
-         d = 2*dx - dy;
-         incrS = 2*dx;
-         incrSE = 2*(-dx - dy);
-         x = x1;
-         y = y1;
-
-         writePixel(x, y, color);
-
-         for (y = y1+1; y >= y2; y--) {
-
-            if (count > max) { /* swap color */
-               count = 0;
-               if (first == TRUE) {
-                  color = color2;
-                  first = FALSE;
-               } else {
-                  color = color1;
-                  first = TRUE;
-               }
-            } else {
-               count++;
-            }
-
-            if (d <= 0) { /* choose S */
-               d += incrS;
-            } else { /* choose SE */
-               d -= incrSE;
-               x++;
-            }
-            writePixel(x, y, color);
-         }
-      }
-   }
-}
-
-/*
- * draws a dashed box. args are upper left and lower right corners as well
- * as the colors to alternate between and the line thickness.
- */
-void drawDashedBox(int x1, int y1, int x2, int y2, COLOR *color1,
-                   COLOR *color2) {
-
-   drawDashedLine(x1, y1, x2, y1, color1, color2);
-   drawDashedLine(x1, y1, x1, y2, color1, color2);
-   drawDashedLine(x2, y1, x2, y2, color1, color2);
-   drawDashedLine(x1, y2, x2, y2, color1, color2);
-
-}
-
-/* from the course website */
 TEXTURE *read_texture(char *infilename) {
 
    FILE *infile;
    char string[STRING_SIZE];
-   int i, j;
+   int i, j, k, l;
+   int r, g, b;
    long img_size;
    int img_max, img_width, img_height;
-   int r, g, b;
    TEXTURE *tex;
+   unsigned char *ibuffer;
+   int ascii = 0;
 
    /* open file containing texture */
    if ((infile = fopen(infilename, "r")) == NULL) {
@@ -923,12 +645,29 @@ TEXTURE *read_texture(char *infilename) {
 
    /* read and discard first two lines */
    fgets(string, STRING_SIZE, infile);
+   if (strncmp(string, "P3", 2) == 0) { /* ascii ppm */
+      debug("found ascii ppm \"%s\"\n", infilename);
+      ascii = 1;
+   } else if (strncmp(string, "P6", 2) == 0) { /* raw ppm */
+      debug("found raw ppm \"%s\"\n", infilename);
+      ascii = 0;
+   } else {
+      die("image file \"%s\" doesnt look like a ppm\n", infilename);
+   }
+
    fgets(string, STRING_SIZE, infile);
+   while (!feof(infile) && (string[0] == '#')) {
+      fgets(string, STRING_SIZE, infile);
+   }
 
    /* read image size and (?)max component value */
-   fscanf(infile, "%d %d", &img_width, &img_height);
-   fscanf(infile, "%d", &img_max);
+   sscanf(string, "%d %d", &img_width, &img_height);
+   debug("ppm \"%s\" is %dx%d\n", infilename, img_width, img_height);
+
+   fgets(string, STRING_SIZE, infile);
+   sscanf(string, "%d", &img_max);
    if (img_max != 255) die("error in texture coord");
+   debug("ppm \"%s\" has img_max = %d\n", infilename, img_max);
 
    /* allocate texture array */
    img_size = 4*img_height*img_width;
@@ -936,20 +675,48 @@ TEXTURE *read_texture(char *infilename) {
       die("error allocating texture image");
    }
 
+   ibuffer = (unsigned char *) malloc(img_height*img_width*3);
+   if (ibuffer == NULL) die("error mallocign buffer\n");
+
    tex->width = img_width;
    tex->height = img_height;
-   tex->tex = (COLOR **)malloc(sizeof(COLOR *)*img_height);
+   tex->tex = (GLubyte *)malloc(img_height*img_width*RGBA);
    if (tex->tex == NULL) die("error mallocing texture\n");
 
-   /* read image data */
-   for (i=0; i<img_height; i++) {
-      tex->tex[i] = (COLOR *)malloc(sizeof(COLOR)*img_width);
-      for (j=0; j<img_width; j++) {
-         fscanf(infile, "%d %d %d", &r, &g, &b);
-         tex->tex[i][j].r = (double) r/256;
-         tex->tex[i][j].g = (double) g/256;
-         tex->tex[i][j].b = (double) b/256;
+   if (ascii) { /* ascii ppm */
+
+      /* read image data */
+      for (i=0; i<img_height; i++) {
+         for (j=0; j<img_width; j++) {
+            fscanf(infile, "%d %d %d", &r, &g, &b);
+
+            *(tex->tex + (RGBA*((img_height-1-i)*img_width+j))) =
+               (GLubyte) r;
+            *(tex->tex + (RGBA*((img_height-1-i)*img_width+j)+1)) =
+               (GLubyte) g;
+            *(tex->tex + (RGBA*((img_height-1-i)*img_width+j)+2)) =
+               (GLubyte) b;
+         }
       }
+
+   } else { /* raw ppm */
+
+      fread(ibuffer, sizeof(unsigned char), img_height*img_width*RGB,
+            infile);
+      fclose(infile);
+
+      l = 0;
+      /* read image data */
+      for (i=0; i<img_height; i++) {
+         for (j=0; j<img_width; j++) {
+            for (k = 0; k < RGB; k++) {
+               *(tex->tex + (RGBA*((img_height-1-i)*img_width+j)+k)) =
+                  (GLubyte) ibuffer[l++];
+            }
+         }
+      }
+
+      free(ibuffer);
    }
 
    return tex;
@@ -958,12 +725,13 @@ TEXTURE *read_texture(char *infilename) {
 
 /*
  * based on read_texture and write_ppm from extract.c. writes the rgb data
- * from image[height][width] to file in ascii ppm format.
+ * from texture provided to file in raw ppm format.
  */
 void write_texture(char *filename, TEXTURE *tex) {
 
    FILE *outfile;
-   int i, j;
+   unsigned char *ibuffer;
+   int i, j, k, l;
 
    debug("write_texture: filename = \"%s\"\n", filename);
 
@@ -971,53 +739,95 @@ void write_texture(char *filename, TEXTURE *tex) {
       die("write_texture: error opening file %s\n", filename);
    }
 
-   fprintf(outfile, "P3\n");
+   ibuffer = (unsigned char *) malloc(tex->width*tex->height*RGB);
+   if (ibuffer == NULL) die("write_texture: malloc failure\n");
+
+   fprintf(outfile, "P6\n");
    fprintf(outfile, "# CREATOR: viewer\n");
    fprintf(outfile, "%d %d\n", tex->width, tex->height);
    fprintf(outfile, "255\n");
 
+   l=0;
    for (i = 0; i < tex->height; i++) {
       for (j = 0; j < tex->width; j++) {
-         fprintf(outfile, "%d %d %d ", (int)(255*tex->tex[i][j].r),
-                 (int)(255*tex->tex[i][j].g), (int)(255*tex->tex[i][j].b));
-         if ((j+1)%5 == 0) fprintf(outfile, "\n");
+         for (k = 0; k < RGB; k++) {
+            ibuffer[l++] = (unsigned char)
+               *(tex->tex + (RGBA*((tex->height-1-i)*tex->width+j)+k));
+         }
       }
    }
-   fprintf(outfile, "\n");
+
+   fwrite(ibuffer, sizeof(unsigned char), RGB*tex->width*tex->height, outfile);
    fclose(outfile);
+   free(ibuffer);
 }
 
 /*
  * based on read_texture and write_ppm from extract.c. writes the rgb data
- * from image[height][width] to file in ascii ppm format.
+ * from subsection of the texture provided to file in raw ppm format
  */
 void write_cropped_texture(char *filename, TEXTURE *tex, int x1, int x2,
                            int y1, int y2) {
 
    FILE *outfile;
-   int i, j;
+   unsigned char *ibuffer;
+   int i, j, k, l;
 
-   debug("write_cropped_texture: filename = \"%s\", x = %d..%d, y = %d..%d\n", 
-         filename, x1, x2, y1, y2);
+   debug("write_texture: filename = \"%s\"\n", filename);
 
    if ((outfile = fopen(filename, "w")) == NULL) {
       die("write_texture: error opening file %s\n", filename);
    }
 
-   fprintf(outfile, "P3\n");
+   ibuffer = (unsigned char *) malloc(tex->width*tex->height*RGB);
+   if (ibuffer == NULL) die("write_texture: malloc failure\n");
+
+   fprintf(outfile, "P6\n");
    fprintf(outfile, "# CREATOR: viewer\n");
    fprintf(outfile, "%d %d\n", x2 - x1, y2 - y1);
    fprintf(outfile, "255\n");
 
+   l=0;
    for (i = y1; i < y2; i++) {
       for (j = x1; j < x2; j++) {
-         fprintf(outfile, "%d %d %d ", (int)(255*tex->tex[i][j].r),
-                 (int)(255*tex->tex[i][j].g), (int)(255*tex->tex[i][j].b));
-         if ((j+1)%5 == 0) fprintf(outfile, "\n");
+         for (k = 0; k < RGB; k++) {
+            ibuffer[l++] = (unsigned char)
+               *(tex->tex + (RGBA*((tex->height-1-i)*tex->width+j)+k));
+         }
       }
    }
-   fprintf(outfile, "\n");
+
+   fwrite(ibuffer, sizeof(unsigned char), RGB*tex->width*tex->height, outfile);
    fclose(outfile);
+   free(ibuffer);
+}
+
+/*
+ * calculates the 'window' (portion of image which is visible on screen)
+ * for a given texture.
+ */
+void calcWindow(TEXTURE *tex) {
+
+   if (tex->x < 0) {
+      tex->x1 = abs(tex->x);
+      if (tex->x + tex->width > screen_x) tex->x2 = tex->x1 + screen_x;
+      else tex->x2 = tex->width;
+   } else {
+      tex->x1 = 0;
+      if (tex->x + tex->width > screen_x) tex->x2 = screen_x - tex->x;
+      else tex->x2 = tex->width;
+   }
+
+   if (tex->y < 0) {
+      tex->y1 = abs(tex->y);
+      if (tex->y + tex->height > screen_y) tex->y2 = tex->y1 + screen_y;
+      else tex->y2 = tex->height;
+   } else {
+      tex->y1 = 0;
+      if (tex->y + tex->height > screen_y) tex->y2 = screen_y + tex->y;
+      else tex->y2 = tex->height;
+   }
+
 }
 
 
