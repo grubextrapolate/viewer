@@ -1,5 +1,6 @@
 ## process this file with automake to generate Makefile.in
 
+AUTOMAKE_OPTIONS = dist-zip dist-bzip2
 bin_PROGRAMS = viewer
 viewer_SOURCES = viewer.c align.c main.c mono.c list.c shared.c viewer.h
 man_MANS = viewer.1
