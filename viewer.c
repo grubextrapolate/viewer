@@ -1,10 +1,5 @@
 #include "viewer.h"
 
-int zooming = FALSE;
-int leftDown = FALSE;
-int rightDown = FALSE;
-int middleDown = FALSE;
-
 /*
  * display function for VIEWER mode. draws the full stereo image across
  * both desktops (both eyes). uses double buffering for drawing.
@@ -179,8 +174,8 @@ void displayFuncView(void) {
          }
          showPos(zright, RIGHT, right);
       }
-      free(zleft);
-      free(zright);
+      freeTexture(&zleft);
+      freeTexture(&zright);
 
    }
 
@@ -215,21 +210,37 @@ void keyboardFuncView(unsigned char key, int x, int y) {
       case 'z': /* zoom in */
       case 'Z':
          szoom += 1;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
+         freeTexture(&(right->thumb));
+         right->thumb = NULL;
          glutPostRedisplay();
          break;
       case 'x': /* zoom out */
       case 'X':
          szoom -= 1;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
+         freeTexture(&(right->thumb));
+         right->thumb = NULL;
          glutPostRedisplay();
          break;
       case 'v': /* small zoom in */
       case 'V':
          szoom += 0.1;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
+         freeTexture(&(right->thumb));
+         right->thumb = NULL;
          glutPostRedisplay();
          break;
       case 'b': /* small zoom out */
       case 'B':
          szoom -= 0.1;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
+         freeTexture(&(right->thumb));
+         right->thumb = NULL;
          glutPostRedisplay();
          break;
 
@@ -255,6 +266,10 @@ void keyboardFuncView(unsigned char key, int x, int y) {
       case 'h': /* home (center and un-zoomed) */
       case 'H':
          szoom = 0;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
+         freeTexture(&(right->thumb));
+         right->thumb = NULL;
          left->x = (screen_x - left->width)/2;
          left->y = (screen_y - left->height)/2;
          calcWindow(left);
@@ -377,21 +392,6 @@ void specialFuncView(int key, int x, int y) {
 }
 
 /*
- * the menu handler. when a menu item is clicked this function controls
- * what happens. only have quit menu at this time.
- */
-void menuFuncView(int item) {
-
-   switch(item) {
-      case 99:
-         exit(0);
-         break;
-      default:
-         break;
-   }
-}
-
-/*
  * resize callback function. this will simply force the window to go back
  * to its original size if the user tries to resize it.
  */
@@ -469,7 +469,14 @@ void motionFuncView(int x, int y) {
    } else if (rightDown) {
 
       szoom -= (float)dy/100;
+
       debug("motionFuncView: new szoom=%f\n", szoom);
+
+      freeTexture(&(left->thumb));
+      left->thumb = NULL;
+      freeTexture(&(right->thumb));
+      right->thumb = NULL;
+
       calcWindow(left);
       calcWindow(right);
 

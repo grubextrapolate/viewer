@@ -90,7 +90,7 @@ void displayFuncViewMono(void) {
          }
          showPos(zleft, LEFT, left);
       }
-      free(zleft);
+      freeTexture(&zleft);
 
    }
 
@@ -124,21 +124,29 @@ void keyboardFuncViewMono(unsigned char key, int x, int y) {
       case 'z': /* zoom in */
       case 'Z':
          szoom += 1;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
          glutPostRedisplay();
          break;
       case 'x': /* zoom out */
       case 'X':
          szoom -= 1;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
          glutPostRedisplay();
          break;
       case 'v': /* small zoom in */
       case 'V':   
          szoom += 0.1;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
          glutPostRedisplay();
          break;
       case 'b': /* small zoom out */
       case 'B':
          szoom -= 0.1;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
          glutPostRedisplay();
          break;
       case 'c': /* center */
@@ -150,32 +158,39 @@ void keyboardFuncViewMono(unsigned char key, int x, int y) {
          break;
       case '1': /* actual size */
          szoom = 0;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
          glutPostRedisplay();
          break;
-
       case 'd': /* double size */
       case 'D':
          szoom = 1;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
          glutPostRedisplay();
          break;
-
       case '2': /* 1/2 size */
          szoom = -1;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
          glutPostRedisplay();
          break;
-
       case '3': /* 1/4 size */
          szoom = -2;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
          glutPostRedisplay();
          break;
-
       case '4': /* 1/8 size */
          szoom = -3;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
          glutPostRedisplay();
          break;
-
       case '5': /* 1/16 size */
          szoom = -4;
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
          glutPostRedisplay();
          break;
       case 'h': /* home (center and un-zoomed) */
@@ -184,9 +199,10 @@ void keyboardFuncViewMono(unsigned char key, int x, int y) {
          left->x = (screen_x - left->width)/2;
          left->y = (screen_y - left->height)/2;
          calcWindow(left);
+         freeTexture(&(left->thumb));
+         left->thumb = NULL;
          glutPostRedisplay();  
          break;
-
       case 'q': /* q or escape to exit */
       case 'Q':
       case 27:
@@ -196,7 +212,6 @@ void keyboardFuncViewMono(unsigned char key, int x, int y) {
       case 'R':
          glutPositionWindow(0, 0);
          break;
-
       default:
          break;
    }
@@ -260,11 +275,26 @@ void motionFuncViewMono(int x, int y) {
    mousey1 = y;
    debug("motionFuncViewMono: mouse moved to (%d,%d), dx=%d, dy=%d\n", x, y, dx, dy);
 
-   left->x += dx;
-   left->y -= dy;
-   calcWindow(left);
+   if (leftDown || middleDown) {
+      left->x += dx;
+      left->y -= dy;
+      calcWindow(left);
 
-   glutPostRedisplay();
+      glutPostRedisplay();
+
+   } else if (rightDown) {
+      szoom -= (float)dy/100;
+
+      debug("motionFuncView: new szoom=%f\n", szoom);
+
+      freeTexture(&(left->thumb));
+      left->thumb = NULL;
+
+      calcWindow(left);
+
+      glutPostRedisplay();
+   }
+
 }
 
 /*

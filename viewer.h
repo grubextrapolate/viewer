@@ -59,6 +59,7 @@ typedef struct TEXTURE {
    int x2;
    int y1;
    int y2;
+   double zoomfac;
    struct TEXTURE *thumb;
 } TEXTURE;
 
@@ -114,7 +115,6 @@ extern int rightDown;
 /* function prototypes for viewer */
 void displayFuncView(void); /* the display function (for viewer) */
 void resizeFuncView(int, int); /* the resize function */
-void menuFuncView(int); /* the menu function */
 void keyboardFuncView(unsigned char, int, int); /* (for viewer) */
 void specialFuncView(int, int, int);
 void mouseFuncView(int, int, int, int);
@@ -131,7 +131,6 @@ void resizeFuncViewMono(int, int); /* the resize function */
 void displayFuncAlign(void); /* the display function */
 void keyboardFuncAlign(unsigned char, int, int);
 void specialFuncAlign(int, int, int);
-void menuFuncAlign(int); /* the menu function */
 void resizeFuncAlign(int, int); /* the resize function */
 void mouseFuncAlign(int, int, int, int);
 void motionFuncAlign(int, int);

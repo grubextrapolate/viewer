@@ -38,6 +38,10 @@ int mousey1 = 0;
 int fine_align = FALSE;
 int force_geom = FALSE;
 
+int leftDown = FALSE;
+int rightDown = FALSE;
+int middleDown = FALSE;
+
 /* display thumbnails */
 int nothumb = FALSE;
 
@@ -53,7 +57,6 @@ int fullscreen = FALSE;
  */
 int main(int argc, char **argv) {
 
-   int mainmenu; /* menu id */
    int i, j, k;
 
    initList(&list);
@@ -143,11 +146,6 @@ int main(int argc, char **argv) {
       glShadeModel(GL_FLAT);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-      /* menu */
-      mainmenu = glutCreateMenu(menuFuncAlign);
-      glutAddMenuEntry("quit",99);
-      glutAttachMenu(GLUT_RIGHT_BUTTON);
-
    } else if (mode == VIEWER) { /* mode == VIEWER */
       debug("main: mode == VIEWER\n");
 
@@ -161,11 +159,6 @@ int main(int argc, char **argv) {
       glShadeModel(GL_FLAT);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-      /* menu */
-//      mainmenu = glutCreateMenu(menuFuncView);
-//      glutAddMenuEntry("quit",99);
-//      glutAttachMenu(GLUT_RIGHT_BUTTON);
-
    } else { /* mode == MONOVIEW */
       debug("main: mode == MONOVIEW\n");
 
@@ -178,11 +171,6 @@ int main(int argc, char **argv) {
       glClearColor(0.0, 0.0, 0.0, 0.0);
       glShadeModel(GL_FLAT);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-      /* menu */
-      mainmenu = glutCreateMenu(menuFuncView);
-      glutAddMenuEntry("quit",99);
-      glutAttachMenu(GLUT_RIGHT_BUTTON);
 
    }
 
@@ -237,6 +225,7 @@ void showUsage() {
    printf("       -r, --right rightoutfile.ppm [default = rightout.ppm]\n");
    printf("       -g, --geom WxH [forces a specific window geometry]\n");
    printf("       -x, --off XY [specifies offset of right image relative to left]\n");
+   printf("       -t, --thumbsize size [size of the square used for thumbnails]\n");
    printf("       -f, --file filename [multi-file viewer mode]\n");
    printf("       -h, --help [display this help message and exit]\n");
    printf("       -n, --nothumb [disable thumbnail view]\n");
@@ -306,6 +295,15 @@ void processArgs(int argc, char **argv) {
             }
             ptr = newPair(argv[i], NULL);
             addPair(ptr, &list);
+         } else {
+            showUsage();
+            exit(-1);
+         }
+      } else if ((strcmp(argv[i], "-t") == 0) ||
+                 (strcmp(argv[i], "--thumbsize") == 0)) {
+         if (i+1 < argc) {
+            i++;
+            thumb_size = atoi(argv[i]);
          } else {
             showUsage();
             exit(-1);

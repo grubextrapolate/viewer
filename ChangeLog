@@ -21,6 +21,9 @@
 -added several keyboard commands from WallView so that the two behave 
  similarly
 -added spec file for building RPMs
+-improved thumbnail rendering so that image doesnt 'blow up' and stays 
+ confined to the set thumb_size x thumb_size area
+-added command line option to change thumbnail size
 
 0.7.3:
 -fixed bug with cropping in aligner mode
