@@ -828,7 +828,8 @@ void showPos(TEXTURE *tex, int eye, TEXTURE *ext_thumb) {
        * remember the scaling factor.
        */
       fac = thumb->thumb->x;
-
+debug("showPos: tex->x=%d, tex->y=%d, fac=%d, szoom=%f\n", tex->x, 
+tex->y, fac, szoom);
       boxw = ((float)screen_x/szoom)/fac;
 //      if (screen_x % fac != 0) boxw++;
       boxh = ((float)screen_y/szoom)/fac;

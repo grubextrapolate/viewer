@@ -386,7 +386,7 @@ void menuFuncView(int item) {
          exit(0);
          break;
       default:
-         ;
+         break;
    }
 }
 

@@ -360,7 +360,7 @@ void menuFuncAlign(int item) {
          exit(0);
          break;
       default:
-         ;
+         break;
    }
 }
 
