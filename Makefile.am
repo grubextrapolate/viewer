@@ -4,6 +4,7 @@ bin_PROGRAMS = viewer
 viewer_SOURCES = viewer.c align.c main.c mono.c list.c shared.c viewer.h
 man_MANS = viewer.1
 data_DATA = AUTHORS COPYING ChangeLog INSTALL NEWS README
+EXTRA_DIST = mac.r viewer.1
 
 if DEBUG_ENABLE
 DEBUG = -DDEBUG -g
