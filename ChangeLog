@@ -20,6 +20,7 @@
 -added import function to automatically find and match up pairs
 -added several keyboard commands from WallView so that the two behave 
  similarly
+-added spec file for building RPMs
 
 0.7.3:
 -fixed bug with cropping in aligner mode
