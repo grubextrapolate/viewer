@@ -1,4 +1,4 @@
-.TH VIEWER 1 "July 21 2002"
+.TH VIEWER 1 "December 11 2002"
 .SH NAME
 viewer \- stereo pair viewer/aligner
 .SH SYNOPSIS
@@ -165,6 +165,10 @@ representing the filename of the right hand image, the third
 representing the x offset of the right image and the fourth representing 
 the y offset of the right image. The 'n' (or next) and 'p' (or prev) 
 keys can be used to view multiple pairs as a slideshow.
+.TP
+.BI \-s,\ --stereo
+Enables hardware stereo mode (also known as clone stereo mode). This 
+option is valid for both viewer and alignment modes.
 
 .SH viewer mode commands
 these are the commands available while in viewer mode:
@@ -315,7 +319,8 @@ This software is covered under the GNU Public License as outlined in the
 COPYING file included with this distribution.
 .SH AUTHORS
 Russ Burdick <wburdick@cs.umn.edu>, with contributions from Nathan Weeks 
-<weeks@usgs.gov>.
+<weeks@usgs.gov>, Andrew Johnson <aej@evl.uic.edu>, and Derek R. Ploor
+<drploor@students.wisc.edu>.
 .SH BUGS
 No known bugs at this time. Please send bug reports to the author.
 .PP

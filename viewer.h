@@ -12,7 +12,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <ctype.h>
-#include <unistd.h>
+
+#ifndef _WIN32
+   #include <unistd.h>
+#endif
 
 #ifndef TRUE
 #define TRUE 1
@@ -28,11 +31,14 @@
 
 #define MAJOR 0
 #define MINOR 7
-#define PATCH 3
+#define PATCH 4
 
 #define RGB 3
 #define RGBA 4
 #define STRING_SIZE 132
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 /* defines a RGB color data type*/
 typedef struct {
@@ -96,6 +102,7 @@ extern int nothumb;
 extern int x_offset;
 extern int y_offset;
 extern PAIRLIST *list;
+extern int clone;
 
 /* function prototypes for viewer */
 void displayFuncView(void); /* the display function (for viewer) */
@@ -129,8 +136,6 @@ void write_ppm(char *, COLOR ***, int, int);
 void write_texture(char *, TEXTURE *);
 void write_cropped_texture(char *, TEXTURE *, int, int, int, int);
 void calcWindow(TEXTURE *);
-int max(int, int);
-int min(int, int);
 void cleanup();
 void die(char *, ...);
 void debug(char *, ...);
@@ -146,6 +151,7 @@ void readFileList(char *, PAIRLIST **);
 void getNextPair(PAIRLIST *);
 void getPrevPair(PAIRLIST *);
 void freeTexture(TEXTURE **);
+int stereoCheck();
 
 /* function prototypes for example */
 TEXTURE *read_JPEG_file (char *);
@@ -160,4 +166,3 @@ extern void deletePair(PAIR *, PAIRLIST **);
 extern void freeList(PAIRLIST **);
 extern void initList(PAIRLIST **);
 extern void freePair(PAIR *);
-

@@ -50,6 +50,8 @@ int nothumb = FALSE;
 
 PAIRLIST *list = NULL;
 
+int clone = 0;
+
 /*
  * the main function. this sets up the global variables, creates menus,
  * associates the various callback functions with their opengl event, and
@@ -95,6 +97,9 @@ int main(int argc, char **argv) {
          screen_x = glutGet(GLUT_SCREEN_WIDTH)/2;
 #endif
          screen_y = glutGet(GLUT_SCREEN_HEIGHT);
+
+         if (clone) screen_x *= 2;
+
       } else {
 #ifndef OS_Darwin
          screen_x = screen_x/2;
@@ -114,7 +119,11 @@ int main(int argc, char **argv) {
 
    /* window */
    glutInitWindowPosition(0, 0);
-   glutInitWindowSize(screen_x*2, screen_y);
+   if (clone) {
+      glutInitWindowSize(screen_x, screen_y);
+   } else {
+      glutInitWindowSize(screen_x*2, screen_y);
+   }
    glutCreateWindow("stereo viewer");
 
    if (mode == ALIGN) { /* mode == ALIGN */
@@ -124,7 +133,8 @@ int main(int argc, char **argv) {
 
       full->width = screen_x*2;
       full->height = screen_y;
-      full->tex = (GLubyte *)malloc(full->width*full->height*RGBA);
+      full->tex = (GLubyte *)malloc(full->width*full->height*
+                                    RGBA*sizeof(GLubyte));
       if (full->tex == NULL) die("main: malloc failure\n");
 
       for (i = 0; i < full->height; i++) {
@@ -224,6 +234,7 @@ void showUsage() {
    printf("       -f, --file filename [multi-file viewer mode]\n");
    printf("       -h, --help [display this help message and exit]\n");
    printf("       -n, --nothumb [disable thumbnail view]\n");
+   printf("       -s, --stereo [enable hardware supported stereo]\n");
    printf("\nmust contain either the -i, -v, -a, -m, or -f options or only basename.\n");
    printf("if the -o, -l, or -r options are omitted default will be used\n");
    printf("\nsee manpage viewer(1) for further information\n\n");
@@ -359,6 +370,15 @@ void processArgs(int argc, char **argv) {
             showUsage();
             exit(-1);
          }
+      } else if ((strcmp(argv[i], "-s") == 0) ||
+                 (strcmp(argv[i], "--stereo") == 0)) {
+         /*
+          * Verify that stereo actually is available.
+          */
+         if (!stereoCheck())
+           die("This system does not support stereo.\n");
+
+         clone = TRUE;
       } else if (argc == 2) {
          basename = argv[1];
          strcpy(buf, argv[1]);
@@ -370,10 +390,15 @@ void processArgs(int argc, char **argv) {
          addPair(ptr, &list);
       } else {
          showUsage();
+         exit(-1);
       }
       i++;
    }
 
+   if (list->cur == NULL) {
+      showUsage();
+      exit(-1);
+   }
 }
 
 void readFileList(char *filename, PAIRLIST **list) {
@@ -529,10 +554,12 @@ void readAndSplit(char *filename) {
    debug("readAndSplit: splitting into left=%dx%d and right=%dx%d\n",
          left->width, left->height, right->width, right->height);
 
-   left->tex = (GLubyte *)malloc(left->height*left->width*RGBA);
+   left->tex = (GLubyte *)malloc(left->height*left->width*
+                                 RGBA*sizeof(GLubyte));
    if (left->tex == NULL) die("readAndSplit: error mallocing texture\n");
 
-   right->tex = (GLubyte *)malloc(right->height*right->width*RGBA);
+   right->tex = (GLubyte *)malloc(right->height*right->width*
+                                  RGBA*sizeof(GLubyte));
    if (right->tex == NULL) die("readAndSplit: error mallocing texture\n");
 
    for (i = 0; i < tmp->height; i++) {
@@ -610,7 +637,8 @@ TEXTURE *read_texture(char *infilename) {
    tex->width = img_width;
    tex->height = img_height;
    tex->thumb = NULL;
-   tex->tex = (GLubyte *)malloc(img_height*img_width*RGBA);
+   tex->tex = (GLubyte *)malloc(img_height*img_width*
+                                RGBA*sizeof(GLubyte));
    if (tex->tex == NULL) die("read_texture: error mallocing texture\n");
 
    if (ascii) { /* ascii ppm */
@@ -763,18 +791,6 @@ void calcWindow(TEXTURE *tex) {
 
 }
 
-int max(int a, int b) {
-
-   if (a > b) return a;
-   else return b;
-}
-
-int min(int a, int b) {
-
-   if (a < b) return a;
-   else return b;
-}
-
 /*
  * this is the cleanup function. it deallocates all polygon memory and
  * exits the program.
@@ -865,7 +881,8 @@ TEXTURE *read_image(char *infilename) {
    }
    tex->width = img_width;
    tex->height = img_height;
-   tex->tex = (GLubyte *)malloc(img_height*img_width*RGBA);
+   tex->tex = (GLubyte *)malloc(img_height*img_width*
+                                RGBA*sizeof(GLubyte));
    if (tex->tex == NULL) die("read_image: error mallocing texture\n");
 
    ibuffer = (unsigned char *) malloc(img_height*img_width*3);
@@ -963,7 +980,8 @@ TEXTURE *zoomImage(TEXTURE *orig, int zoomfac) {
       ret->height = ret->y2 - ret->y1;
 
       if ((ret->width >= 0) && (ret->height >= 0)) {
-         ret->tex = (GLubyte *)malloc(ret->height*ret->width*RGBA);
+         ret->tex = (GLubyte *)malloc(ret->height*ret->width*
+                                      RGBA*sizeof(GLubyte));
          if (ret->tex == NULL) die("zoomImage: error mallocing texture\n");
 
          for (i = ret->y1; i < ret->y2; i++) {
@@ -1006,7 +1024,8 @@ TEXTURE *zoomImage(TEXTURE *orig, int zoomfac) {
       ret->height = ret->y2 - ret->y1;
 
       if ((ret->width >= 0) && (ret->height >= 0)) {
-         ret->tex = (GLubyte *)malloc(ret->height*ret->width*RGBA);
+         ret->tex = (GLubyte *)malloc(ret->height*ret->width*
+                                      RGBA*sizeof(GLubyte));
          if (ret->tex == NULL) die("zoomImage: error mallocing texture\n");
 
          for (i = ret->y1; i < ret->y2; i++) {
@@ -1092,7 +1111,8 @@ TEXTURE *makeThumb(TEXTURE *orig) {
             orig->height, orig->width);
       debug("makeThumb: ret->height=%d, ret->width=%d\n", ret->height, 
             ret->width);
-      ret->tex = (GLubyte *)malloc(ret->height*ret->width*RGBA);
+      ret->tex = (GLubyte *)malloc(ret->height*ret->width*
+                                   RGBA*sizeof(GLubyte));
       if (ret->tex == NULL) die("makeThumb: error mallocing texture\n");
 
       for (i = 0; i < ret->height; i++) {
@@ -1137,7 +1157,7 @@ void showPos(TEXTURE *tex, int dx, int dy, int eye) {
 
    if ((!nothumb) && (tex != NULL)) {
       if (tex->thumb == NULL) tex->thumb = makeThumb(tex);
-      if (eye == LEFT) {
+      if (eye == LEFT || clone) {
          x = screen_x - thumb_size - 20;
       } else {
          x = screen_x*2 - thumb_size - 20;
@@ -1165,6 +1185,13 @@ void showPos(TEXTURE *tex, int dx, int dy, int eye) {
 
       /* draw image on background */
       if (tex->thumb->tex != NULL) {
+         if (clone) {
+            if (eye == LEFT) {
+               glDrawBuffer(GL_LEFT);
+            } else { /* (eye == RIGHT) */
+               glDrawBuffer(GL_RIGHT);
+            }
+         }
          glRasterPos2i(x, y);
          glDrawPixels(tex->thumb->width, tex->thumb->height, GL_RGBA, 
                       GL_UNSIGNED_BYTE, tex->thumb->tex);
@@ -1186,13 +1213,24 @@ void showPos(TEXTURE *tex, int dx, int dy, int eye) {
 void drawBox(int x, int y, int w, int h, int *color, int eye) {
 
    int i = 0, x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-   GLubyte img[1][w][RGBA];
+   GLubyte *img = NULL;
+
+   img = (GLubyte *)malloc(w*RGBA*sizeof(GLubyte));
+   if (img == NULL) die("drawBox: malloc failure\n");
 
    for (i = 0; i < w; i++) {
-      img[0][i][0] = color[0];
-      img[0][i][1] = color[1];
-      img[0][i][2] = color[2];
-      img[0][i][3] = 0;
+      *(img + (RGBA*i)) = (GLubyte) color[0];
+      *(img + (RGBA*i + 1)) = (GLubyte) color[1];
+      *(img + (RGBA*i + 2)) = (GLubyte) color[2];
+      *(img + (RGBA*i + 3)) = (GLubyte) 0;
+   }
+
+   if (clone) {
+      if (eye == LEFT) {
+         glDrawBuffer(GL_LEFT);
+      } else { /* (eye == RIGHT) */
+         glDrawBuffer(GL_RIGHT);
+      }
    }
 
    /* check boundary to make sure box stays on correct eye */
@@ -1200,12 +1238,12 @@ void drawBox(int x, int y, int w, int h, int *color, int eye) {
    x2 = x+w-1;
    y1 = y;
    y2 = y+h-1;
-   if (eye == LEFT) {
+   if (eye == LEFT || clone) {
       if (x1 < 0) x1 = 0;
       if (x1 > screen_x-1) x1 = screen_x;
       if (x2 < 0) x2 = 0;
       if (x2 > screen_x-1) x2 = screen_x;
-   }else {
+   } else {
       if (x1 < screen_x) x1 = screen_x-1;
       if (x1 > screen_x*2-1) x1 = screen_x*2;
       if (x2 < screen_x) x2 = screen_x-1;
@@ -1223,7 +1261,7 @@ void drawBox(int x, int y, int w, int h, int *color, int eye) {
    }
 
    /* draw left side of box */
-   if (((eye == LEFT) && ((x1 > 0) && (x1 < screen_x-1))) || 
+   if (((eye == LEFT || clone) && ((x1 > 0) && (x1 < screen_x-1))) || 
        ((eye == RIGHT) && ((x1 > screen_x) && (x1 < screen_x*2-1)))) {
       for (i = y1+1; i < y2; i++) {
          glRasterPos2i(x1, i);
@@ -1231,7 +1269,7 @@ void drawBox(int x, int y, int w, int h, int *color, int eye) {
       }
    }
    /* draw right side of box */
-   if (((eye == LEFT) && ((x2 > 0) && (x2 < screen_x-1))) || 
+   if (((eye == LEFT || clone) && ((x2 > 0) && (x2 < screen_x-1))) || 
        ((eye == RIGHT) && ((x2 > screen_x) && (x2 < screen_x*2-1)))) {
       for (i = y1+1; i < y2; i++) {
          glRasterPos2i(x2, i);
@@ -1244,6 +1282,8 @@ void drawBox(int x, int y, int w, int h, int *color, int eye) {
       glRasterPos2i(x1, y2);
       glDrawPixels(x2-x1+1, 1, GL_RGBA, GL_UNSIGNED_BYTE, img);
    }
+
+   free(img);
 }
 
 /*
@@ -1253,13 +1293,24 @@ void drawBox(int x, int y, int w, int h, int *color, int eye) {
 void drawFilledBox(int x, int y, int w, int h, int *color, int eye) {
 
    int i = 0, x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-   GLubyte img[1][w][RGBA];
+   GLubyte *img = NULL;
+
+   img = (GLubyte *)malloc(w*RGBA*sizeof(GLubyte));
+   if (img == NULL) die("drawBox: malloc failure\n");
 
    for (i = 0; i < w; i++) {
-      img[0][i][0] = color[0];
-      img[0][i][1] = color[1];
-      img[0][i][2] = color[2];
-      img[0][i][3] = 0;
+      *(img + (RGBA*i)) = (GLubyte) color[0];
+      *(img + (RGBA*i + 1)) = (GLubyte) color[1];
+      *(img + (RGBA*i + 2)) = (GLubyte) color[2];
+      *(img + (RGBA*i + 3)) = (GLubyte) 0;
+   }
+
+   if (clone) {
+      if (eye == LEFT) {
+         glDrawBuffer(GL_LEFT);
+      } else { /* (eye == RIGHT) */
+         glDrawBuffer(GL_RIGHT);
+      }
    }
 
    /* check boundary to make sure box stays on correct eye */
@@ -1267,12 +1318,12 @@ void drawFilledBox(int x, int y, int w, int h, int *color, int eye) {
    x2 = x+w-1;
    y1 = y;
    y2 = y+h-1;
-   if (eye == LEFT) {
+   if (eye == LEFT || clone) {
       if (x1 < 0) x1 = 0;
       if (x1 > screen_x-1) x1 = screen_x;
       if (x2 < 0) x2 = 0;
       if (x2 > screen_x-1) x2 = screen_x;
-   }else {
+   } else {
       if (x1 < screen_x) x1 = screen_x-1;
       if (x1 > screen_x*2-1) x1 = screen_x*2;
       if (x2 < screen_x) x2 = screen_x-1;
@@ -1288,4 +1339,24 @@ void drawFilledBox(int x, int y, int w, int h, int *color, int eye) {
       glRasterPos2i(x1, i);
       glDrawPixels(x2-x1+1, 1, GL_RGBA, GL_UNSIGNED_BYTE, img);
    }
+}
+
+/* int stereoCheck()
+ *
+ * Checks whether left and right buffers for stereo are supported.
+ *
+ * If stereo buffers are available, 1 is returned;
+ * else, 0 is returned.
+ */
+int stereoCheck() {
+ 
+   unsigned char state;
+   int ret = 0;
+
+   glGetBooleanv(GL_STEREO, &state);
+
+   if (state)
+      ret = 1;
+ 
+   return ret;
 }

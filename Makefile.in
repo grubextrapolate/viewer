@@ -1,4 +1,4 @@
-# Makefile - viewer-0.7.2
+# Makefile - viewer-0.7.4
 # Russ Burdick 2001-2002
 
 #DEBUG = -DDEBUG -g
@@ -35,6 +35,9 @@ viewer: $(OBJ)
 install: viewer viewer.1
 	$(INSTALL) --mode=0755 viewer $(bindir)
 	$(INSTALL) --mode=0644 viewer.1 $(mandir)
+
+mac: viewer
+	/Developer/Tools/Rez -t APPL viewer mac.r
 
 uninstall:
 	rm -f $(bindir)/viewer

@@ -43,9 +43,16 @@ void displayFuncAlign(void) {
       off = RGBA*(left->y1*left->width+left->x1);
 
       for (i = 0; i < h; i++) {
-         glRasterPos2i(rx, ry + i);
-         glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
-                      left->tex+off);
+         if (clone) {
+            glDrawBuffer(GL_LEFT);
+            glRasterPos2i(rx, ry + i);
+            glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+                         left->tex+off);
+         } else {
+            glRasterPos2i(rx, ry + i);
+            glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+                         left->tex+off);
+         }
          off += r;
       }
       showPos(left, 0, 0, LEFT);
@@ -63,9 +70,16 @@ void displayFuncAlign(void) {
       off = RGBA*(right->y1*right->width+right->x1);
 
       for (i = 0; i < h; i++) {
-         glRasterPos2i(rx+screen_x, ry + i);
-         glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
-                      right->tex+off);
+         if (clone) {
+            glDrawBuffer(GL_RIGHT);
+            glRasterPos2i(rx, ry + i);
+            glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+                         right->tex+off);
+         } else {
+            glRasterPos2i(rx+screen_x, ry + i);
+            glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+                         right->tex+off);
+         }
          off += r;
       }
       showPos(right, 0, 0, RIGHT);
@@ -107,10 +121,10 @@ void keyboardFuncAlign(unsigned char key, int x, int y) {
                right->width, right->height, right->x, right->y, screen_x +
                list->cur->x_offset, list->cur->y_offset);
 
-         crop_x1 = max(left->x, right->x);
-         crop_x2 = min(left->x + left->width, right->x + right->width);
-         crop_y1 = max(left->y, right->y);
-         crop_y2 = min(left->y + left->height, right->y + right->height);
+         crop_x1 = MAX(left->x, right->x);
+         crop_x2 = MIN(left->x + left->width, right->x + right->width);
+         crop_y1 = MAX(left->y, right->y);
+         crop_y2 = MIN(left->y + left->height, right->y + right->height);
 
          debug("keyboardFuncAlign: crop_x1=%d, crop_x2=%d, crop_y1=%d, crop_y2=%d\n",
                crop_x1, crop_x2, crop_y1, crop_y2);
@@ -128,7 +142,8 @@ void keyboardFuncAlign(unsigned char key, int x, int y) {
 
          full->width = screen_x*2;
          full->height = screen_y;
-         full->tex = (GLubyte *)malloc(full->width*full->height*RGBA);
+         full->tex = (GLubyte *)malloc(full->width*full->height*
+                                       RGBA*sizeof(GLubyte));
          if (full->tex == NULL) die("keyboardFuncAlign: malloc failure\n");
 
          for (i = 0; i < full->height; i++) {
