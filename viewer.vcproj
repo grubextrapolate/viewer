@@ -116,6 +116,9 @@
 			<File
 				RelativePath="viewer.c">
 			</File>
+			<File
+				RelativePath="shared.c">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
