@@ -96,9 +96,7 @@ int main(int argc, char **argv) {
          screen_y = glutGet(GLUT_SCREEN_HEIGHT);
 
       } else {
-#ifndef OS_Darwin
          screen_x = screen_x/2;
-#endif
       }
 
       if (clone_mode) screen_x *= 2;
