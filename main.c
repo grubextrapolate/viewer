@@ -27,9 +27,8 @@ char *basename = NULL;
 /* either in ALIGN mode or in VIEWER mode */
 int mode = VIEWER;
 
-int zoom = 0;
-double szoom = 1;
-int thumb_size = 50;
+double szoom = 0;
+int thumb_size = 100;
 
 TEXTURE *zoomLeft = NULL;
 TEXTURE *zoomRight = NULL;
@@ -44,9 +43,8 @@ int nothumb = FALSE;
 
 PAIRLIST *list = NULL;
 
-int clone = FALSE;
+int clone_mode = FALSE;
 int fullscreen = FALSE;
-int loading = FALSE;
 
 /*
  * the main function. this sets up the global variables, creates menus,
@@ -63,7 +61,7 @@ int main(int argc, char **argv) {
 
    glutInit(&argc, argv);
 
-   if (clone) {
+   if (clone_mode) {
       glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_STEREO);
    } else {
       glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE);
@@ -96,7 +94,7 @@ int main(int argc, char **argv) {
 #endif
       }
 
-      if (clone) screen_x *= 2;
+      if (clone_mode) screen_x *= 2;
 
       debug("main: screen_x = %d, screen_y = %d\n", screen_x, screen_y);
 
@@ -104,7 +102,7 @@ int main(int argc, char **argv) {
 
    /* window */
    glutInitWindowPosition(0, 0);
-   if (clone) {
+   if (clone_mode) {
       glutInitWindowSize(screen_x, screen_y);
    } else {
       glutInitWindowSize(screen_x*2, screen_y);
@@ -189,9 +187,7 @@ int main(int argc, char **argv) {
    }
 
    if (list->cur != NULL) {
-loading = TRUE;
       readPair(list->cur);
-loading = FALSE;
    } else {
       die("main: why is list->cur == NULL?\n");
    }
@@ -246,7 +242,8 @@ void showUsage() {
    printf("       -n, --nothumb [disable thumbnail view]\n");
    printf("       -s, --stereo [enable hardware supported stereo]\n");
    printf("       -u, --fullscreen [enable fullscreen mode]\n");
-   printf("\nmust contain either the -i, -v, -a, -m, or -f options or only basename.\n");
+   printf("       -p, --import <file(s)> [import the file(s) in viewer mode]\n");
+   printf("\nmust contain either the -i, -v, -a, -m, -p, or -f options or only basename.\n");
    printf("if the -o, -l, or -r options are omitted default will be used\n");
    printf("\nsee manpage viewer(1) for further information\n\n");
 }
@@ -261,6 +258,9 @@ void processArgs(int argc, char **argv) {
    char buf2[2048];
    PAIR *ptr = NULL;
    int xoff = 0, yoff = 0;
+   int j = 0;
+   int count = 0;
+   char** flist;
 
    if (argc == 1) { /* display usage */
       showUsage();
@@ -300,9 +300,9 @@ void processArgs(int argc, char **argv) {
          if (i+1 < argc) {
             i++;
             mode = MONOVIEW;
-            if (clone) {
+            if (clone_mode) {
                printf("stereo mode is incompatible with mono viewing. stereo option ignored.\n");
-               clone = FALSE;
+               clone_mode = FALSE;
             }
             ptr = newPair(argv[i], NULL);
             addPair(ptr, &list);
@@ -403,7 +403,7 @@ void processArgs(int argc, char **argv) {
          if (mode == MONOVIEW) {
             printf("stereo mode is incompatible with mono viewing. stereo option ignored.\n");
          } else {
-            clone = TRUE;
+            clone_mode = TRUE;
          }
       } else if ((strcmp(argv[i], "-u") == 0) ||
                  (strcmp(argv[i], "--fullscreen") == 0)) {
@@ -412,6 +412,20 @@ void processArgs(int argc, char **argv) {
          } else {
             fullscreen = TRUE;
          }
+      } else if ((strcmp(argv[i], "-p") == 0) ||
+                 (strcmp(argv[i], "--import") == 0)) {
+         j = i+1;
+         while ((j < argc) && (*(argv[j]) != '-')) {
+            j++;
+            count++;
+         }
+         debug("processArgs: counted %d images for import\n", count);
+         flist = (char **)malloc(sizeof(char*)*count);
+         for (j = 0; j < count; j++)
+            flist[j] = argv[i+j+1];
+         sortList(count, flist);
+         findPairs(count, flist);
+         i += count;
       } else if (argc == 2) {
          basename = argv[1];
          strcpy(buf, argv[1]);
@@ -431,6 +445,105 @@ void processArgs(int argc, char **argv) {
    if (list->cur == NULL) {
       showUsage();
       exit(-1);
+   }
+}
+
+/*
+ * move down the (sorted) list of images. if the next item in the list 
+ * is the matching pair, mark the pair and skip them both. if the next 
+ * item does not match, ignore it and try the next item.
+ */
+void findPairs(int count, char **flist) {
+   int i = 0;
+   int j = 0;
+   int left = 0;
+   int right = 0;
+   int differ = 0;
+   char *p1 = NULL;
+   char *p2 = NULL;
+   PAIR *ptr = NULL;
+
+   for (i = 0; i < (count - 1); i++) {
+      j = i+1;
+      right = -1;
+      left = -1;
+      p1 = flist[i];
+      p2 = flist[j];
+      debug("findPairs: p1=\"%s\"\nfindPairs: p2=\"%s\"\n", p1, p2);
+
+      while ((*p1 != '\0') && (*p2 != '\0')) {
+         if (*p1 == *p2) {
+            debug("findPairs: char %d matches (%c)\n", p1 - flist[i], *p1);
+         } else {
+            debug("findPairs: char %d does not match (%c,%c)\n", p1 - flist[i], *p1, *p2);
+            differ++;
+            if (((tolower(*p1) == 'l') && (tolower(*p2) == 'r')) && 
+                (differ == 1)) {
+               left = i;
+               right = j;
+            } else if (((tolower(*p1) == 'e') && (tolower(*p2) == 'i')) && 
+                (differ == 2)) {
+            } else if (((tolower(*p1) == 'f') && (tolower(*p2) == 'g')) && 
+                 (differ == 3)) {
+            } else if (((tolower(*p1) == 't') && (tolower(*p2) == 'h')) && 
+                (differ == 4)) {
+               if (tolower(*(p2+1)) == 't')
+                  p2++;
+            } else {
+               debug("findPairs: pair mismatch\n");
+               p1 = p1 + strlen(p1) - 1; //drop out of loop
+               left = -1;
+               right = -1;
+            }
+         }
+         p1++;
+         p2++;
+      }
+      if ((left > -1) && (right > -1)) {
+         debug("findPairs: looks like a good pair\n");
+         debug("findPairs: file \"%s\" looks like left image\n", flist[left]);
+         debug("findPairs: file \"%s\" looks like right image\n", flist[right]);
+         ptr = newPair(flist[left], flist[right]);
+         addPair(ptr, &list);
+         i++;
+      } else {
+         debug("findPairs: \"%s\" does not have a pair\n", flist[i]);
+      }
+      left = -1;
+      right = -1;
+      differ = 0;
+   }
+
+
+}
+
+/*
+ * sorts a given list alphabetically. this should leave left and right 
+ * image adjacent in the list.
+ */
+void sortList(int count, char **flist) {
+
+   char *tmp = NULL;
+   int i, j;
+
+   if (flist == NULL) { /* insure there is a list to sort */
+      debug("sortList: null list\n");
+   } else if (count == 1) { /* only one item, no sorting */
+      debug("sortList: one item list\n");
+   } else {
+      /* do a bubble sort by alphabet. */
+      for (i = 0; i < (count - 1); i++) {
+         for (j = i+1; j < count; j++) {
+
+            if (strcmp(flist[i], flist[j]) > 0) {
+               tmp = flist[i];
+               flist[i] = flist[j];
+               flist[j] = tmp;
+            }
+
+         }
+      }
+      debug("sortList: list sorted\n");
    }
 }
 

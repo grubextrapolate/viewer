@@ -178,6 +178,10 @@ viewer mode commands
 
        z      zoom in
 
+       b      small zoom out
+
+       v      small zoom in
+
        n      next image
 
        p      previous image

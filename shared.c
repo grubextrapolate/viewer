@@ -63,6 +63,7 @@ void readPair(PAIR *pair) {
             right = read_texture(pair->right_file);
          }
       }
+
    } else {
       die("readPair: cant read null pair\n");
    }
@@ -272,7 +273,6 @@ TEXTURE *read_texture(char *infilename) {
             }
          }
       }
-
       free(ibuffer);
    }
 
@@ -528,155 +528,26 @@ TEXTURE *read_image(char *infilename) {
 }
 
 /*
- * integer version of the pow function. takes integer args and returns
- * an integer. only works for positive integer powers.
- */
-int ipow(int base, int exp) {
-
-   int ret = 0;
-   int i = 0;
-
-   if (exp == 0) {
-      ret = 1;
-   } else if (exp > 0) {
-      ret = base;
-      for (i = 1; i < exp; i++) {
-         ret *= base;
-      }
-   } else { /* error */
-      ret = -1;
-   }
-    
-   return ret;
-}
-
-/*
- * returns the image scaled by the appropriate zoom factor.
- */
-TEXTURE *zoomImage(TEXTURE *orig, int zoomfac) {
-
-   TEXTURE *ret = NULL;
-   int i, j, k, l, a, b, r, g, x, y, off;
-
-   if ((ret = (TEXTURE *)malloc(sizeof(TEXTURE))) == NULL) {
-      die("zoomImage: error allocating texture image");
-   }
-
-   if (zoomfac > 0) { /* zoom in. replicates single pixel into blocks */
-
-      debug("zoomImage: zoom in, zoomfac=%d\n", zoomfac);
-      a = ipow(2, abs(zoomfac));
-
-      ret->thumb = NULL;
-      ret->width = orig->width*a;
-      ret->height = orig->height*a;
-
-      ret->x = orig->x + (orig->width - ret->width)/2;
-      ret->y = orig->y + (orig->height - ret->height)/2;
-      calcWindow(ret);
-
-      ret->width = ret->x2 - ret->x1;
-      ret->height = ret->y2 - ret->y1;
-
-      if ((ret->width >= 0) && (ret->height >= 0)) {
-         ret->tex = (GLubyte *)malloc(ret->height*ret->width*
-                                      RGBA*sizeof(GLubyte));
-         if (ret->tex == NULL) die("zoomImage: error mallocing texture\n");
-
-         for (i = ret->y1; i < ret->y2; i++) {
-            for (j = ret->x1; j < ret->x2; j++) {
-               off = RGBA*((i/a)*orig->width+(j/a));
-               r = (int) *(orig->tex + off);
-               g = (int) *(orig->tex + off + 1);
-               b = (int) *(orig->tex + off + 2);
-
-               off = RGBA*((i-ret->y1)*ret->width+(j-ret->x1));
-               *(ret->tex + off) = (GLubyte) r;
-               *(ret->tex + off + 1) = (GLubyte) g;
-               *(ret->tex + off + 2) = (GLubyte) b;
-            }
-         }
-
-         if (ret->x < 0) ret->x = 0;
-         if (ret->y < 0) ret->y = 0;
-         calcWindow(ret);
-      }
-   } else { /* zoom out. averages blocks of pixels */
-
-      debug("zoomImage: zoom out, zoomfac=%d\n", zoomfac);
-      a = ipow(2, abs(zoomfac));
-
-      b = orig->width % a;
-      ret->width = orig->width/a;
-      if (b != 0) ret->width++;
-
-      b = orig->height % a;
-      ret->height = orig->height/a;
-      if (b != 0) ret->height++;
-
-      ret->x = orig->x + (orig->width - ret->width)/2;
-      ret->y = orig->y + (orig->height - ret->height)/2;
-
-      calcWindow(ret);
-
-      ret->width = ret->x2 - ret->x1;
-      ret->height = ret->y2 - ret->y1;
-
-      if ((ret->width >= 0) && (ret->height >= 0)) {
-         ret->tex = (GLubyte *)malloc(ret->height*ret->width*
-                                      RGBA*sizeof(GLubyte));
-         if (ret->tex == NULL) die("zoomImage: error mallocing texture\n");
-
-         for (i = ret->y1; i < ret->y2; i++) {
-            for (j = ret->x1; j < ret->x2; j++) {
-               r = 0; g = 0; b = 0;
-               x = orig->height % a;
-               if (x == 0) x = a;
-               y = orig->width % a;
-               if (y == 0) y = a;
-               for (k = 0; k < x; k++) {
-                  for (l = 0; l < y; l++) {
-                     off = RGBA*((i*a+k)*orig->width+(j*a+l));
-                     r += (int) *(orig->tex + off);
-                     g += (int) *(orig->tex + off + 1);
-                     b += (int) *(orig->tex + off + 2);
-                  }
-               }
-               r = r/(x*y);
-               g = g/(x*y);
-               b = b/(x*y);
-               off = RGBA*((i-ret->y1)*ret->width+(j-ret->x1));
-               *(ret->tex + off) = (GLubyte) r;
-               *(ret->tex + off + 1) = (GLubyte) g;
-               *(ret->tex + off + 2) = (GLubyte) b;
-            }
-         }
-
-         if (ret->x < 0) ret->x = 0;
-         if (ret->y < 0) ret->y = 0;
-         calcWindow(ret);
-      }
-   }
-   return(ret);
-
-}
-
-/*
  * returns the image scaled by the appropriate zoom factor.
  */
 TEXTURE *zoomImageSmooth(TEXTURE *orig, double zoomfac) {
 
    TEXTURE *ret = NULL;
    int i, j, r, g, b, off;
+   double a;
 
    if ((ret = (TEXTURE *)malloc(sizeof(TEXTURE))) == NULL) {
       die("zoomImageSmooth: error allocating texture image");
    }
 
-   debug("zoomImageSmooth: zoomfac=%f\n", zoomfac);
+      debug("zoomImageSmooth: zoom in, zoomfac=%f\n", zoomfac);
+//      a = pow(2, fabs(zoomfac));
+      a = pow(2, zoomfac);
+
+   debug("zoomImageSmooth: zoomfac=%f\n", a);
    ret->thumb = NULL;
-   ret->width = (float)orig->width*zoomfac;
-   ret->height = (float)orig->height*zoomfac;
+   ret->width = (float)orig->width*a;
+   ret->height = (float)orig->height*a;
    debug("zoomImageSmooth: new width = %d, new height = %d\n", ret->width, ret->height);
 
    ret->x = orig->x + (orig->width - ret->width)/2;
@@ -693,8 +564,8 @@ TEXTURE *zoomImageSmooth(TEXTURE *orig, double zoomfac) {
 
       for (i = ret->y1; i < ret->y2; i++) {
          for (j = ret->x1; j < ret->x2; j++) {
-            off = RGBA*((int) (((int) ((float)i/zoomfac))*orig->width + 
-                               ((float)j/zoomfac)));
+            off = RGBA*((int) (((int) ((float)i/a))*orig->width + 
+                               ((float)j/a)));
             r = (int) *(orig->tex + off);
             g = (int) *(orig->tex + off + 1);
             b = (int) *(orig->tex + off + 2);
@@ -752,13 +623,15 @@ TEXTURE *makeThumb(TEXTURE *orig) {
       ret->x = a;
       debug("makeThumb: zoomfac=%d\n", a);
 
-      b = orig->width % a;
-      ret->width = orig->width/a;
-      if (b != 0) ret->width++;
+//      b = orig->width % a;
+//      ret->width = orig->width/a;
+//      if (b != 0) ret->width++;
+      ret->width = (float)orig->width/a + 0.5;
 
-      b = orig->height % a;
-      ret->height = orig->height/a;
-      if (b != 0) ret->height++;
+//      b = orig->height % a;
+//      ret->height = orig->height/a;
+//      if (b != 0) ret->height++;
+      ret->height = (float)orig->height/a + 0.5;
 
       debug("makeThumb: orig->height=%d, orig->width=%d\n", 
             orig->height, orig->width);
@@ -808,15 +681,16 @@ void showPos(TEXTURE *tex, int eye, TEXTURE *ext_thumb) {
    int white[] = {255, 255, 255};
    int black[] = {0, 0, 0};
    TEXTURE *thumb;
+   double a, b;
 
-//   if (ext_thumb != NULL) {
-//      thumb = ext_thumb;
-//   } else {
+   if (ext_thumb != NULL) {
+      thumb = ext_thumb;
+   } else {
       thumb = tex;
-//   }
-   if ((!nothumb) && (tex != NULL)) {
+   }
+   if ((!nothumb) && (thumb != NULL)) {
       if (thumb->thumb == NULL) thumb->thumb = makeThumb(thumb);
-      if (eye == LEFT || clone) {
+      if (eye == LEFT || clone_mode) {
          x = screen_x - thumb_size - 20;
       } else {
          x = screen_x*2 - thumb_size - 20;
@@ -828,17 +702,48 @@ void showPos(TEXTURE *tex, int eye, TEXTURE *ext_thumb) {
        * remember the scaling factor.
        */
       fac = thumb->thumb->x;
-debug("showPos: tex->x=%d, tex->y=%d, fac=%d, szoom=%f\n", tex->x, 
-tex->y, fac, szoom);
-      boxw = ((float)screen_x/szoom)/fac;
-//      if (screen_x % fac != 0) boxw++;
-      boxh = ((float)screen_y/szoom)/fac;
-//      if (screen_y % fac != 0) boxh++;
+      a = pow(2, szoom);
 
-      boxx = ((float)tex->x/szoom)/fac;
-      if (tex->x % fac != 0) boxx++;
-      boxy = ((float)tex->y/szoom)/fac;
-      if (tex->y % fac != 0) boxy++;
+debug("showPos: tex->x=%d, tex->y=%d, fac=%d, szoom=%f, a=%f\n", tex->x, 
+tex->y, fac, szoom, a);
+
+//   ret->x = orig->x + (orig->width - ret->width)/2;
+//   ret->y = orig->y + (orig->height - ret->height)/2;
+
+      if (a == 0) {
+         boxw = (float)screen_x/fac + 0.5;
+         boxh = (float)screen_y/fac + 0.5;
+
+         if (thumb->x > 0) {
+            boxx = (float)thumb->x/fac + 0.5;
+         } else {
+            boxx = (float)thumb->x/fac - 0.5;
+         }
+         if (thumb->y > 0) {
+            boxy = (float)thumb->y/fac + 0.5;
+         } else {
+            boxy = (float)thumb->y/fac - 0.5;
+         }
+
+      } else {
+
+         b = ((double)1 - (double)1/a)/2;
+
+         if (thumb->x > 0) {
+            boxx = (float)thumb->x/fac*b + 0.5;
+         } else {
+            boxx = (float)thumb->x/fac*b - 0.5;
+         }
+         if (thumb->y > 0) {
+            boxy = (float)thumb->y/fac*b + 0.5;
+         } else {
+            boxy = (float)thumb->y/fac*b - 0.5;
+         }
+
+         boxw = ((float)screen_x/fac + (float)screen_x/fac/a) + 0.5;
+         boxh = ((float)screen_y/fac - (float)screen_y/fac/a) + 0.5;
+      }
+
 debug("showPos: boxw=%d, boxh=%d, boxx=%d, boxy=%d\n", boxw, boxh, boxx, 
 boxy);
 
@@ -847,7 +752,7 @@ boxy);
 
       /* draw image on background */
       if (thumb->thumb->tex != NULL) {
-         if (clone) {
+         if (clone_mode) {
             if (eye == LEFT) {
                glDrawBuffer(GL_BACK_LEFT);
             } else { /* (eye == RIGHT) */
@@ -889,7 +794,7 @@ void drawBox(int x, int y, int w, int h, int *color, int eye) {
       *(img + (RGBA*i + 3)) = (GLubyte) 0;
    }
 
-   if (clone) {
+   if (clone_mode) {
       if (eye == LEFT) {
          glDrawBuffer(GL_BACK_LEFT);
       } else { /* (eye == RIGHT) */
@@ -904,7 +809,7 @@ void drawBox(int x, int y, int w, int h, int *color, int eye) {
    x2 = x+w-1;
    y1 = y;
    y2 = y+h-1;
-   if (eye == LEFT || clone) {
+   if (eye == LEFT || clone_mode) {
       if (x1 < 0) x1 = 0;
       if (x1 > screen_x-1) x1 = screen_x;
       if (x2 < 0) x2 = 0;
@@ -929,7 +834,7 @@ debug("drawBox: x1=%d, x2=%d, y1=%d, y2=%d\n", x1, x2, y1, y2);
    }
 
    /* draw left side of box */
-   if (((eye == LEFT || clone) && ((x1 > 0) && (x1 < screen_x-1))) || 
+   if (((eye == LEFT || clone_mode) && ((x1 > 0) && (x1 < screen_x-1))) || 
        ((eye == RIGHT) && ((x1 > screen_x) && (x1 < screen_x*2-1)))) {
       for (i = y1+1; i < y2; i++) {
          glRasterPos2i(x1, i);
@@ -937,7 +842,7 @@ debug("drawBox: x1=%d, x2=%d, y1=%d, y2=%d\n", x1, x2, y1, y2);
       }
    }
    /* draw right side of box */
-   if (((eye == LEFT || clone) && ((x2 > 0) && (x2 < screen_x-1))) || 
+   if (((eye == LEFT || clone_mode) && ((x2 > 0) && (x2 < screen_x-1))) || 
        ((eye == RIGHT) && ((x2 > screen_x) && (x2 < screen_x*2-1)))) {
       for (i = y1+1; i < y2; i++) {
          glRasterPos2i(x2, i);
@@ -973,7 +878,7 @@ void drawFilledBox(int x, int y, int w, int h, int *color, int eye) {
       *(img + (RGBA*i + 3)) = (GLubyte) 0;
    }
 
-   if (clone) {
+   if (clone_mode) {
       if (eye == LEFT) {
          glDrawBuffer(GL_BACK_LEFT);
       } else { /* (eye == RIGHT) */
@@ -988,7 +893,7 @@ void drawFilledBox(int x, int y, int w, int h, int *color, int eye) {
    x2 = x+w-1;
    y1 = y;
    y2 = y+h-1;
-   if (eye == LEFT || clone) {
+   if (eye == LEFT || clone_mode) {
       if (x1 < 0) x1 = 0;
       if (x1 > screen_x-1) x1 = screen_x;
       if (x2 < 0) x2 = 0;
@@ -1032,38 +937,3 @@ int stereoCheck() {
  
    return ret;
 }
-
-void drawProgress(double percent) {
-   int white[] = {255, 255, 255};
-   int black[] = {0, 0, 0};
-   int boxw, boxh, barw, barh;
-   int boxx, boxy, barx, bary;
-   int edge = 10;
-   int gap = 3;
-
-   boxw = screen_x - edge*2;
-   boxh = edge*2;
-   barw = boxw - gap*2;
-   barh = boxh - gap*2;
-
-   boxx = edge;
-   boxy = (screen_y - edge*2) / 2;
-   barx = boxx + gap;
-   bary = boxy + gap;
-
-   barw = (float)barw * percent;
-
-   if (mode == MONOVIEW) {
-
-      drawFilledBox(boxx, boxy, boxw, boxh, black, LEFT);
-
-      drawBox(boxx, boxy, boxw, boxh, white, LEFT);
-
-      drawFilledBox(barx, bary, barw, barh, white, LEFT);
-
-   } else {
-
-   }
-
-}
-

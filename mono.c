@@ -19,7 +19,7 @@ void displayFuncViewMono(void) {
       first_time = FALSE;
    }
 
-   if (zoom == 0) {
+   if (szoom == 0) {
 
       if ((left->width >= 0) && (left->height >= 0)) {
 
@@ -56,7 +56,7 @@ void displayFuncViewMono(void) {
       }
    } else {
 
-      zleft = zoomImage(left, zoom);
+      zleft = zoomImageSmooth(left, szoom);
 
       if ((zleft->width >= 0) && (zleft->height >= 0)) {
          if ((zleft->x > 0) || (zleft->x + zleft->width < screen_x) ||
@@ -88,12 +88,12 @@ void displayFuncViewMono(void) {
                          zleft->tex+off);
             off += r;
          }
-/*         showPos(zleft, LEFT, left);*/
+         showPos(zleft, LEFT, left);
       }
       free(zleft);
 
    }
-drawProgress(progress);
+
    glutSwapBuffers();
 }
 
@@ -123,12 +123,22 @@ void keyboardFuncViewMono(unsigned char key, int x, int y) {
          break;
       case 'z': /* zoom in */
       case 'Z':
-         zoom++;
+         szoom += 1;
          glutPostRedisplay();
          break;
       case 'x': /* zoom out */
       case 'X':
-         zoom--;
+         szoom -= 1;
+         glutPostRedisplay();
+         break;
+      case 'v': /* small zoom in */
+      case 'V':   
+         szoom += 0.1;
+         glutPostRedisplay();
+         break;
+      case 'b': /* small zoom out */
+      case 'B':
+         szoom -= 0.1;
          glutPostRedisplay();
          break;
       case 'c': /* center */
@@ -138,6 +148,45 @@ void keyboardFuncViewMono(unsigned char key, int x, int y) {
          calcWindow(left);
          glutPostRedisplay();
          break;
+      case '1': /* actual size */
+         szoom = 0;
+         glutPostRedisplay();
+         break;
+
+      case 'd': /* double size */
+      case 'D':
+         szoom = 1;
+         glutPostRedisplay();
+         break;
+
+      case '2': /* 1/2 size */
+         szoom = -1;
+         glutPostRedisplay();
+         break;
+
+      case '3': /* 1/4 size */
+         szoom = -2;
+         glutPostRedisplay();
+         break;
+
+      case '4': /* 1/8 size */
+         szoom = -3;
+         glutPostRedisplay();
+         break;
+
+      case '5': /* 1/16 size */
+         szoom = -4;
+         glutPostRedisplay();
+         break;
+      case 'h': /* home (center and un-zoomed) */
+      case 'H':
+         szoom = 0;
+         left->x = (screen_x - left->width)/2;
+         left->y = (screen_y - left->height)/2;
+         calcWindow(left);
+         glutPostRedisplay();  
+         break;
+
       case 'q': /* q or escape to exit */
       case 'Q':
       case 27:
@@ -146,17 +195,6 @@ void keyboardFuncViewMono(unsigned char key, int x, int y) {
       case 'r': /* r to re-display at (0,0) */
       case 'R':
          glutPositionWindow(0, 0);
-         break;
-
-      case 'a':
-         progress += 0.01;
-         if (progress > 1) progress = 1;
-         glutPostRedisplay();
-         break;
-      case 'A':
-         progress -= 0.01;
-         if (progress < 0) progress = 0;
-         glutPostRedisplay();
          break;
 
       default:

@@ -44,7 +44,7 @@ void displayFuncAlign(void) {
       off = RGBA*(left->y1*left->width+left->x1);
 
       for (i = 0; i < h; i++) {
-         if (clone) {
+         if (clone_mode) {
             glDrawBuffer(GL_BACK_LEFT);
             glRasterPos2i(rx, ry + i);
             glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
@@ -72,7 +72,7 @@ void displayFuncAlign(void) {
       off = RGBA*(right->y1*right->width+right->x1);
 
       for (i = 0; i < h; i++) {
-         if (clone) {
+         if (clone_mode) {
             glDrawBuffer(GL_BACK_RIGHT);
             glRasterPos2i(rx, ry + i);
             glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
@@ -373,7 +373,7 @@ void menuFuncAlign(int item) {
  */
 void resizeFuncAlign(int height, int width) {
 
-   if (clone) {
+   if (clone_mode) {
       glutReshapeWindow(screen_x, screen_y);
       glViewport(0, 0, screen_x, screen_y);
       glMatrixMode(GL_PROJECTION);

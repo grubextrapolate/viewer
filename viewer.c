@@ -23,7 +23,7 @@ void displayFuncView(void) {
       first_time = FALSE;
    }
 
-   if ((zoom == 0) && (szoom == 1)) {
+   if (szoom == 0) {
 
       if ((left->x > 0) || (left->x + left->width < screen_x) ||
           (left->y > 0) || (left->y + left->height < screen_y) ||
@@ -33,7 +33,7 @@ void displayFuncView(void) {
          /* at least one edge showing, so blank */
          debug("displayFuncView: blanking screen\n");
 
-         if (clone) {
+         if (clone_mode) {
             glDrawBuffer(GL_BACK_LEFT);
             glClear(GL_COLOR_BUFFER_BIT);
             glDrawBuffer(GL_BACK_RIGHT);
@@ -58,7 +58,7 @@ void displayFuncView(void) {
          r = left->width*RGBA;
          off = RGBA*(left->y1*left->width+left->x1);
 
-         if (clone) {
+         if (clone_mode) {
             for (i = 0; i < h; i++) {
                glDrawBuffer(GL_BACK_LEFT);
                glRasterPos2i(rx, ry + i);
@@ -75,7 +75,7 @@ void displayFuncView(void) {
                off += r;
             }
          }
-//         showPos(left, LEFT, NULL);
+         showPos(left, LEFT, NULL);
       }
       if ((right->width >= 0) && (right->height >= 0)) {
 
@@ -90,7 +90,7 @@ void displayFuncView(void) {
          off = RGBA*(right->y1*right->width+right->x1);
 
          for (i = 0; i < h; i++) {
-            if (clone) {
+            if (clone_mode) {
                glDrawBuffer(GL_BACK_RIGHT);
                glRasterPos2i(rx, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
@@ -103,18 +103,13 @@ void displayFuncView(void) {
             }
             off += r;
          }
-//         showPos(right, RIGHT, NULL);
+         showPos(right, RIGHT, NULL);
       }
 
    } else {
 
-      if (zoom == 0) {
-         zleft = zoomImageSmooth(left, szoom);
-         zright = zoomImageSmooth(right, szoom);
-      } else {
-         zleft = zoomImage(left, zoom);
-         zright = zoomImage(right, zoom);
-      }
+      zleft = zoomImageSmooth(left, szoom);
+      zright = zoomImageSmooth(right, szoom);
 
       if ((zleft->x > 0) || (zleft->x + zleft->width < screen_x) ||
           (zleft->y > 0) || (zleft->y + zleft->height < screen_y) ||
@@ -142,7 +137,7 @@ void displayFuncView(void) {
          off = RGBA*(zleft->y1*zleft->width+zleft->x1);
 
          for (i = 0; i < h; i++) {
-            if (clone) {
+            if (clone_mode) {
                glDrawBuffer(GL_BACK_LEFT);
                glRasterPos2i(rx, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
@@ -155,7 +150,7 @@ void displayFuncView(void) {
             }
             off += r;
          }
-//         showPos(zleft, LEFT, left);
+         showPos(zleft, LEFT, left);
       }
       if ((zright->width >= 0) && (zright->height >= 0)) {
          if (zright->x < 0) rx = 0;
@@ -169,7 +164,7 @@ void displayFuncView(void) {
          off = RGBA*(zright->y1*zright->width+zright->x1);
 
          for (i = 0; i < h; i++) {
-            if (clone) {
+            if (clone_mode) {
                glDrawBuffer(GL_BACK_RIGHT);
                glRasterPos2i(rx, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
@@ -182,7 +177,7 @@ void displayFuncView(void) {
             }
             off += r;
          }
-//         showPos(zright, RIGHT, right);
+         showPos(zright, RIGHT, right);
       }
       free(zleft);
       free(zright);
@@ -219,20 +214,20 @@ void keyboardFuncView(unsigned char key, int x, int y) {
 
       case 'z': /* zoom in */
       case 'Z':
-         zoom++;
+         szoom += 1;
          glutPostRedisplay();
          break;
       case 'x': /* zoom out */
       case 'X':
-         zoom--;
+         szoom -= 1;
          glutPostRedisplay();
          break;
-      case 'v': /* smooth zoom in */
+      case 'v': /* small zoom in */
       case 'V':
          szoom += 0.1;
          glutPostRedisplay();
          break;
-      case 'b': /* smooth zoom out */
+      case 'b': /* small zoom out */
       case 'B':
          szoom -= 0.1;
          glutPostRedisplay();
@@ -259,7 +254,7 @@ void keyboardFuncView(unsigned char key, int x, int y) {
          break;
       case 'h': /* home (center and un-zoomed) */
       case 'H':
-         szoom = 1;
+         szoom = 0;
          left->x = (screen_x - left->width)/2;
          left->y = (screen_y - left->height)/2;
          calcWindow(left);
@@ -281,33 +276,33 @@ void keyboardFuncView(unsigned char key, int x, int y) {
          break;
 
       case '1': /* actual size */
-         szoom = 1;
+         szoom = 0;
          glutPostRedisplay();
          break;
 
       case 'd': /* double size */
       case 'D':
-         szoom = 2;
+         szoom = 1;
          glutPostRedisplay();
          break;
 
       case '2': /* 1/2 size */
-         szoom = 0.5;
+         szoom = -1;
          glutPostRedisplay();
          break;
 
       case '3': /* 1/4 size */
-         szoom = 0.25;
+         szoom = -2;
          glutPostRedisplay();
          break;
 
       case '4': /* 1/8 size */
-         szoom = 0.125;
+         szoom = -3;
          glutPostRedisplay();
          break;
 
       case '5': /* 1/16 size */
-         szoom = 0.0625;
+         szoom = -4;
          glutPostRedisplay();
          break;
 
@@ -402,7 +397,7 @@ void menuFuncView(int item) {
  */
 void resizeFuncView(int height, int width) {
 
-   if (clone) {
+   if (clone_mode) {
       glutReshapeWindow(screen_x, screen_y);
       glViewport(0, 0, screen_x, screen_y);
       glMatrixMode(GL_PROJECTION);
@@ -473,8 +468,8 @@ void motionFuncView(int x, int y) {
 
    } else if (rightDown) {
 
-      szoom += (float)dy/100;
-
+      szoom -= (float)dy/100;
+      debug("motionFuncView: new szoom=%f\n", szoom);
       calcWindow(left);
       calcWindow(right);
 

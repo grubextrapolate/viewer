@@ -110,14 +110,12 @@ extern int nothumb;
 extern int x_offset;
 extern int y_offset;
 extern PAIRLIST *list;
-extern int clone;
+extern int clone_mode;
 extern int fullscreen;
 
 extern int leftDown;
 extern int middleDown;
 extern int rightDown;
-extern int loading;
-extern double progress;
 
 /* function prototypes for viewer */
 void displayFuncView(void); /* the display function (for viewer) */
@@ -168,7 +166,8 @@ void getNextPair(PAIRLIST *);
 void getPrevPair(PAIRLIST *);
 void freeTexture(TEXTURE **);
 int stereoCheck();
-void drawProgress(double);
+void findPairs(int, char **);
+void sortList(int, char **);
 
 /* function prototypes for example */
 TEXTURE *read_JPEG_file (char *);
