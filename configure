@@ -1348,16 +1348,15 @@ fi
 echo $ac_n "checking OS type""... $ac_c" 1>&6
 echo "configure:1350: checking OS type" >&5
 
-OS_TYPE=`uname -s`
+OS_TYPE=`uname -s | sed -e 's/ /_/g'`
 echo "$ac_t""$OS_TYPE" 1>&6
 
 echo $ac_n "checking machine architecture""... $ac_c" 1>&6
 echo "configure:1356: checking machine architecture" >&5
 
-ARCH_TYPE=`uname -m`
+ARCH_TYPE=`uname -m | sed -e 's/ /_/g'`
 echo "$ac_t""$ARCH_TYPE" 1>&6
 
-CC=
 CFLAGS=
 LIBS=
 LIBDIRS=
@@ -1378,7 +1377,6 @@ JPEG_DIR=
 
 case "$OS_TYPE" in
   Linux|FreeBSD|OpenBSD|NetBSD)
-    CC="gcc"
     LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
     LDFLAGS="-O2"
     LIBDIRS="-L/usr/X11R6/lib"
@@ -1397,7 +1395,6 @@ case "$OS_TYPE" in
     ;;
 
   SunOS)
-    CC="/opt/SUNWspro/bin/cc"
     LIBS="-lMesaglut -lMesaGLU  -lMesaGL -lXext -lXi -lXmu -lX11 -lsocket -lm"
     LIBDIRS="-L/soft/X11R6.3/lib"
     EXTRALIBS="-R/soft/X11R6.3/lib -ljpeg"
@@ -1406,26 +1403,23 @@ case "$OS_TYPE" in
     ;;
 
   IRIX)
-    CC="cc"
     LDFLAGS="-Ofast=ip22_4k -lglut -lGLU -lGL -lXmu -lX11 -lm"
     EXTRALIBS="-ljpeg"
     CFLAGS="-Ofast=ip22_4k -Dinline="
     ;;
 
   IRIX_gcc)
-    CC="gcc"
     LDFLAGS="-lglut -lGLU -lGL -lXmu -lX11 -lm"
     EXTRALIBS="-ljpeg"
     CFLAGS="-O2 -Dinline="
     ;;
 
   Darwin)
-    CC="gcc"
     LIBS="-lobjc -lm"
     LDFLAGS="-O3"
-    LIBDIRS="-L$(JPEG_DIR)/lib"
+    LIBDIRS="-L${JPEG_DIR}/lib"
     EXTRALIBS="-framework GLUT -framework OpenGL -ljpeg"
-    INCDIRS="-I/System/Library/Frameworks/GLUT.framework/Headers -I/System/Library/Frameworks/OpenGL.framework/Headers -I$(JPEG_DIR)/include"
+    INCDIRS="-I/System/Library/Frameworks/GLUT.framework/Headers -I/System/Library/Frameworks/OpenGL.framework/Headers -I${JPEG_DIR}/include"
     CFLAGS="-O3"
     JPEG_DIR="/usr/local/jpeg"
     ;;

@@ -12,9 +12,6 @@ make install
 if for some reason this doesnt 'just work' for you, please let me know 
 so that i can fix the build script.
 
-note: although i've put some basic stuff for JPG images in, this release 
-still only supports PPM images.
-
 usage:
 ------
 

@@ -361,8 +361,10 @@ void readAndSplit(char *filename) {
       die("readAndSplit: error allocating texture image");
    }
 
+   left->thumb = NULL;
    left->width = tmp->width/2;
    left->height = tmp->height;
+   right->thumb = NULL;
    right->width = tmp->width - left->width;
    right->height = tmp->height;
 

@@ -1,5 +1,11 @@
-#include <GL/glut.h>
-#include <GL/gl.h>
+#ifdef OS_Darwin
+  #include <glut.h>
+  #include <gl.h>
+#else
+  #include <GL/glut.h>
+  #include <GL/gl.h>
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
