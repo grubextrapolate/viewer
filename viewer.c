@@ -1,5 +1,7 @@
 #include "viewer.h"
 
+int zooming = FALSE;
+
 /*
  * display function for VIEWER mode. draws the full stereo image across
  * both desktops (both eyes). uses double buffering for drawing.
@@ -232,6 +234,10 @@ void keyboardFuncView(unsigned char key, int x, int y) {
       case 27:
          exit(0);
          break;
+      case 'r': /* r to re-display at (0,0) */
+      case 'R':
+         glutPositionWindow(0, 0);
+         break;
 
       default:
          break;
@@ -348,6 +354,7 @@ void mouseFuncView(int button, int state, int x, int y) {
    } else if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP)) {
       debug("mouseFuncView: mouse left up at (%d,%d)\n", x, y);
    }
+
 }
 
 void motionFuncView(int x, int y) {

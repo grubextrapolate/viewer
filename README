@@ -154,9 +154,16 @@ OPTIONS
               be used to view multiple pairs as a slideshow.
 
        -s, --stereo
-              Enables  hardware  stereo mode (also known as clone
-              stereo mode). This option is valid for both  viewer
-              and alignment modes.
+              Enables  hardware stereo mode (also known as "clone
+              stereo" mode or "quad buffered stereo mode").  This
+              option  is  valid  for  both  viewer  and alignment
+              modes, but if specified with mono mode it  will  be
+              ignored.
+
+       -u, --fullscreen
+              Enables  fullscreen  mode.  This  is  valid for all
+              viewing modes, but if the window geometry is forced
+              this option will be ignored.
 
 viewer mode commands
        these are the commands available while in viewer mode:
@@ -313,5 +320,5 @@ BUGS
        No known bugs at this time. Please send bug reports to the
        author.
 
-                         December 11 2002               VIEWER(1)
+                         December 15 2002               VIEWER(1)
 

@@ -137,6 +137,10 @@ void keyboardFuncViewMono(unsigned char key, int x, int y) {
       case 27:
          exit(0);
          break;
+      case 'r': /* r to re-display at (0,0) */
+      case 'R':
+         glutPositionWindow(0, 0);
+         break;
 
       default:
          break;

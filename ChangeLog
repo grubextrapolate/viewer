@@ -1,3 +1,16 @@
+0.7.4:
+-added support for hardware stereo modes (also known as clone stereo or 
+ quad buffered stereo) thanks to code supplied by Derek R. Ploor
+ <drploor@students.wisc.edu> of the University of Wisconsin eMedia 
+ Center.
+-added support for building on MS Windows platforms thanks again to 
+ Derek at the eMedia Center.
+-added a few fixes for Darwin builds thanks to ongoing assistance by 
+ Andrew Johnson <aej@evl.uic.edu> of the Electronic Visualization Lab, 
+ University of Illinois at Chicago.
+-added fullscreen mode
+-updates to documentation
+
 0.7.3:
 -fixed bug with cropping in aligner mode
 -added thumbnail view to aligner mode

@@ -1,4 +1,4 @@
-.TH VIEWER 1 "December 11 2002"
+.TH VIEWER 1 "December 15 2002"
 .SH NAME
 viewer \- stereo pair viewer/aligner
 .SH SYNOPSIS
@@ -167,8 +167,13 @@ the y offset of the right image. The 'n' (or next) and 'p' (or prev)
 keys can be used to view multiple pairs as a slideshow.
 .TP
 .BI \-s,\ --stereo
-Enables hardware stereo mode (also known as clone stereo mode). This 
-option is valid for both viewer and alignment modes.
+Enables hardware stereo mode (also known as "clone stereo" mode or "quad
+buffered stereo mode"). This option is valid for both viewer and
+alignment modes, but if specified with mono mode it will be ignored.
+.TP
+.BI \-u,\ --fullscreen
+Enables fullscreen mode. This is valid for all viewing modes, but if the 
+window geometry is forced this option will be ignored.
 
 .SH viewer mode commands
 these are the commands available while in viewer mode:

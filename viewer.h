@@ -103,6 +103,7 @@ extern int x_offset;
 extern int y_offset;
 extern PAIRLIST *list;
 extern int clone;
+extern int fullscreen;
 
 /* function prototypes for viewer */
 void displayFuncView(void); /* the display function (for viewer) */

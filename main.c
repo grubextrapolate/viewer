@@ -42,8 +42,8 @@ TEXTURE *zoomRight = NULL;
 
 int mousex1 = 0;
 int mousey1 = 0;
-int fine_align = 0;
-int force_geom = 0;
+int fine_align = FALSE;
+int force_geom = FALSE;
 
 /* display thumbnails */
 int nothumb = FALSE;
@@ -51,6 +51,7 @@ int nothumb = FALSE;
 PAIRLIST *list = NULL;
 
 int clone = FALSE;
+int fullscreen = FALSE;
 
 /*
  * the main function. this sets up the global variables, creates menus,
@@ -129,6 +130,10 @@ int main(int argc, char **argv) {
       glutInitWindowSize(screen_x*2, screen_y);
    }
    glutCreateWindow("stereo viewer");
+
+   if (fullscreen) {
+      glutFullScreen();
+   }
 
    if (mode == ALIGN) { /* mode == ALIGN */
       debug("main: mode == ALIGN\n");
@@ -239,6 +244,7 @@ void showUsage() {
    printf("       -h, --help [display this help message and exit]\n");
    printf("       -n, --nothumb [disable thumbnail view]\n");
    printf("       -s, --stereo [enable hardware supported stereo]\n");
+   printf("       -u, --fullscreen [enable fullscreen mode]\n");
    printf("\nmust contain either the -i, -v, -a, -m, or -f options or only basename.\n");
    printf("if the -o, -l, or -r options are omitted default will be used\n");
    printf("\nsee manpage viewer(1) for further information\n\n");
@@ -306,8 +312,12 @@ void processArgs(int argc, char **argv) {
       } else if ((strcmp(argv[i], "-g") == 0) ||
                  (strcmp(argv[i], "--geom") == 0)) {
          if (i+1 < argc) {
+            if (fullscreen) {
+               printf("fullscreen mode is incompatible with forced-geometry viewing. fullscreen option disabled\n");
+               fullscreen = FALSE;
+            }
             i++;
-            force_geom = 1;
+            force_geom = TRUE;
             sscanf(argv[i], "%dx%d", &screen_x, &screen_y);
             debug("processArgs: geometry forced to %dx%d\n", screen_x, screen_y);
          } else {
@@ -393,6 +403,13 @@ void processArgs(int argc, char **argv) {
             printf("stereo mode is incompatible with mono viewing. stereo option ignored.\n");
          } else {
             clone = TRUE;
+         }
+      } else if ((strcmp(argv[i], "-u") == 0) ||
+                 (strcmp(argv[i], "--fullscreen") == 0)) {
+         if (force_geom) {
+            printf("fullscreen mode is incompatible with forced-geometry viewing. fullscreen option disabled\n");
+         } else {
+            fullscreen = TRUE;
          }
       } else if (argc == 2) {
          basename = argv[1];
