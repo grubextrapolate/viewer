@@ -2,22 +2,32 @@ building viewer:
 ----------------
 
 Building viewer should now work on many platforms due to the use of 
-autoconf. To build viewer do the following:
+autoconf and automake. To build viewer do the following:
+
+LINUX BUILD INSTRUCTIONS:
 
 ./configure
 make
-make strip [this step optional]
 make install
-
-if for some reason this doesnt 'just work' for you, please let me know 
-so that i can fix the build script.
 
 MAC OSX BUILD INSTRUCTIONS:
 
 ./configure
 make mac
-make strip [this step optional]
 make install
+
+WINDOWS BUILD INSTRUCTIONS:
+
+In windows there are two build options: opening the viewer.vcproj file 
+in visual studio or using the command line 'nmake' tool to build using 
+the supplied Makefile.win file. To use the makefile you need to open a 
+command prompt that knows about the visual studio programs (there is 
+usually an option for this in the visual studio portion of the menu) and 
+change to the directory where you have uncompressed viewer. Typing 
+"nmake /file Makefile.win" should build everything.
+
+if for some reason the above instructions dont 'just work' for you,
+please let me know so that i can fix it.
 
 usage:
 ------
