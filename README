@@ -12,9 +12,48 @@ make install
 
 MAC OSX BUILD INSTRUCTIONS:
 
+Generally, builds on OSX are the same as with linux, however some
+versions of the GLUT libraries have the problem that the program will
+not get focus when started. To fix this issue OSX users can use a
+resource patch (mac.r). For all versions of OSX you should do the 
+following two steps:
+
 ./configure
+make
+
+Then you can test out the viewer binary to see if you need to apply the 
+resource patch before you install:
+
+./viewer -m testimage.ppm
+
+if the application gets focus you will be able to move the image around 
+with the arrow keys. In this case you don't need the resource patch and 
+you can just install:
+
+make install
+
+Otherwise, you need to apply the resouce patch before you install. This 
+can be done by:
+
 make mac
 make install
+
+OS 10.2 is known to require the resource patch, but my testing on OS 
+10.3 did not require the resource patch. If you have results different 
+than this (or if you test on another OS version) please let me know and 
+I'll update this document.
+
+Another mac-specific item is the detection of desktop size. When viewer
+probes the OpenGL system to find out the desktop size, it is told the
+same thing regardless of whether you have a single desktop or a
+horizontally spanning pair of desktops. As a result, viewer will double 
+the width it is told (assuming that you are using viewer on a dual head 
+system). One slight drawback to this is that when using viewer in a 
+single headed configuration (as I often do when testing), it will only 
+half fit on the screen. To resolve this issue, you will need to use the 
+'-g' option to specify the size of your desktop. For example, 
+
+viewer -g 1024x768 -i left.ppm right.ppm
 
 WINDOWS BUILD INSTRUCTIONS:
 
