@@ -231,9 +231,6 @@ TEXTURE *read_texture(char *infilename) {
       die("read_texture: error allocating texture image");
    }
 
-   ibuffer = (unsigned char *) malloc(img_height*img_width*3);
-   if (ibuffer == NULL) die("read_texture: error mallocing buffer\n");
-
    tex->width = img_width;
    tex->height = img_height;
    tex->thumb = NULL;
@@ -258,6 +255,9 @@ TEXTURE *read_texture(char *infilename) {
       }
 
    } else { /* raw ppm */
+
+      ibuffer = (unsigned char *) malloc(img_height*img_width*3);
+      if (ibuffer == NULL) die("read_texture: error mallocing buffer\n");
 
       fread(ibuffer, sizeof(unsigned char), img_height*img_width*RGB,
             infile);

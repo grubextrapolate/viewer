@@ -236,7 +236,7 @@ void showUsage() {
    printf("       -l, --left leftoutfile.ppm [default = leftout.ppm]\n");
    printf("       -r, --right rightoutfile.ppm [default = rightout.ppm]\n");
    printf("       -g, --geom WxH [forces a specific window geometry]\n");
-   printf("       -x, --off XY [specifies offset of right image relative to left\n");
+   printf("       -x, --off XY [specifies offset of right image relative to left]\n");
    printf("       -f, --file filename [multi-file viewer mode]\n");
    printf("       -h, --help [display this help message and exit]\n");
    printf("       -n, --nothumb [disable thumbnail view]\n");
