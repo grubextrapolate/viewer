@@ -16,18 +16,16 @@
 #define FALSE 0
 #endif
 
+#define LEFT 0
+#define RIGHT 1
+
 #define MAJOR 0
-#define MINOR 6
-#define PATCH 1
+#define MINOR 7
+#define PATCH 0
 
-#define winHeight 400 /* window width */
-#define winWidth 400  /* window height */
-
-#define LARGE_NUM 9999999999
+#define RGB 3
+#define RGBA 4
 #define STRING_SIZE 132
-
-/* uncomment to show debugging output */
-/* #define DEBUG */
 
 /* defines a RGB color data type*/
 typedef struct {
@@ -37,7 +35,7 @@ typedef struct {
 } COLOR;
 
 /* defines a texture data type */
-typedef struct {
+typedef struct TEXTURE {
    GLubyte *tex;
    int width;
    int height;
@@ -47,82 +45,77 @@ typedef struct {
    int x2;
    int y1;
    int y2;
+   struct TEXTURE *thumb;
 } TEXTURE;
 
-float pi = 3.14159265358979; /* pi, obviously */
+/* global variables */
+extern int first_time;
+extern int screen_x;
+extern int screen_y;
+extern int offset_x;
+extern int offset_y;
+extern TEXTURE *left;
+extern TEXTURE *right;
+extern TEXTURE *full;
+extern TEXTURE *zoomLeft;
+extern TEXTURE *zoomRight;
+extern char *fullOutfile;
+extern char *leftOutfile;
+extern char *rightOutfile;
+extern char *basename;
+extern int mode;
+extern int zoom;
+extern int mousex1;
+extern int mousey1;
+extern int fine_align;
+extern int thumb_size;
 
-/*
- * this is the cleanup function. it deallocates all polygon memory and
- * exits the program.
- */
-void cleanup() {
+/* function prototypes for viewer */
+void displayFuncView(void); /* the display function (for viewer) */
+void resizeFuncView(int, int); /* the resize function */
+void menuFuncView(int); /* the menu function */
+void keyboardFuncView(unsigned char, int, int); /* (for viewer) */
+void specialFuncView(int, int, int);
+void mouseFuncView(int, int, int, int);
+void motionFuncView(int, int);
 
-   exit(0);
+/* function prototypes for mono viewer */
+void displayFuncViewMono(void); /* the display function (for viewer) */
+void keyboardFuncViewMono(unsigned char, int, int); /* (for viewer) */
+void specialFuncViewMono(int, int, int);
+void motionFuncViewMono(int, int);
+void resizeFuncViewMono(int, int); /* the resize function */
 
-}
+/* function prototypes for aligner */
+void displayFuncAlign(void); /* the display function */
+void keyboardFuncAlign(unsigned char, int, int);
+void specialFuncAlign(int, int, int);
+void menuFuncAlign(int); /* the menu function */
+void resizeFuncAlign(int, int); /* the resize function */
 
-/* displays an error message and exits the program */
-void die(char *fmt, ...) {
-   va_list ap;
-   va_start(ap, fmt);
-   vfprintf(stderr, fmt, ap);
-   exit(-1);
-}
+/* function prototypes for main */
+void processArgs(int, char **);
+TEXTURE *read_texture(char *); 
+void write_ppm(char *, COLOR ***, int, int);
+void write_texture(char *, TEXTURE *);
+void write_cropped_texture(char *, TEXTURE *, int, int, int, int);
+void calcWindow(TEXTURE *);
+int max(int, int);
+int min(int, int);
+void cleanup();
+void die(char *, ...);
+void debug(char *, ...);
+int ipow(int, int);
+TEXTURE *zoomImage(TEXTURE *, int);
+void showPos(TEXTURE *, int, int, int);
+TEXTURE *makeThumb(TEXTURE *);
+int isjpeg(char *);
+void drawBox(int, int, int, int, int *color, int);
+void drawFilledBox(int, int, int, int, int *color, int);
 
-/* displays a debugging message if debugging is turned on */
-void debug(char *fmt, ...) {
-#ifdef DEBUG
-   va_list ap;
-   va_start(ap,fmt);
-   vfprintf(stderr, fmt, ap);
-#endif
-}
+/* function prototypes for example */
+TEXTURE *read_JPEG_file (char *);
+void write_JPEG_file(char *, int, TEXTURE *);
+void readAndSplit(char *);
 
-double sign(double arg) {
-   double ret;
-
-   if (arg < 0) ret = -1;
-   else if (arg > 0) ret = 1;
-   else ret = 0;
-
-   return ret;
-}
-
-int max(int a, int b) {
-
-   if (a > b) return a;
-   else return b;
-}
-
-int min(int a, int b) {
-
-   if (a < b) return a;
-   else return b;   
-}  
-
-double fmax(double a, double b) {
-
-   if (a > b) return a;
-   else return b;
-}
-
-double fmin(double a, double b) {
-
-   if (a < b) return a;
-   else return b;   
-}  
-
-/*
- * calculates the distance between two points.
- */
-float distance(int x1, int y1, int x2, int y2) { 
-  
-   int dx, dy;
-
-   dx = x2 - x1;
-   dy = y2 - y1;
-   
-   return(sqrt(dx*dx + dy*dy));
-   
-}
 

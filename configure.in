@@ -1,0 +1,111 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(viewer.c)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+
+dnl Checks for libraries.
+AC_SEARCH_LIBS(floor, m)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+
+dnl Checks for library functions.
+AC_PROG_GCC_TRADITIONAL
+AC_FUNC_VPRINTF
+
+AC_MSG_CHECKING(OS type)
+AC_SUBST(OS_TYPE)
+OS_TYPE=`uname -s`
+AC_MSG_RESULT($OS_TYPE)
+
+AC_MSG_CHECKING(machine architecture)
+AC_SUBST(ARCH_TYPE)
+ARCH_TYPE=`uname -m`
+AC_MSG_RESULT($ARCH_TYPE)
+
+CC=
+CFLAGS=
+LIBS=
+LIBDIRS=
+LDFLAGS=
+INCDIRS=
+EXTRALIBS=
+JPEG_DIR=
+
+AC_SUBST(CC)
+AC_SUBST(CFLAGS)
+AC_SUBST(LIBS)
+AC_SUBST(EXTRALIBS)
+AC_SUBST(LDFLAGS)
+AC_SUBST(LIBDIRS)
+AC_SUBST(INCDIRS)
+AC_SUBST(JPEG_DIR)
+AC_SUBST(INSTALL)
+
+case "$OS_TYPE" in
+  Linux|FreeBSD|OpenBSD|NetBSD)
+    CC="gcc"
+    LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
+    LDFLAGS="-O2"
+    LIBDIRS="-L/usr/X11R6/lib"
+    EXTRALIBS="-ljpeg -Xlinker -rpath /usr/X11R6/lib"
+    INCDIRS="-I/usr/X11R6/include"
+    CFLAGS="-Wall -O2"
+    if test "$OS_TYPE" = "FreeBSD" ; then
+      OS_TYPE="BSD"
+    fi
+    if test "$OS_TYPE" = "OpenBSD" ; then
+      OS_TYPE="BSD"
+    fi
+    if test "$OS_TYPE" = "NetBSD" ; then
+      OS_TYPE="BSD"
+    fi
+    ;;
+
+  SunOS)
+    CC="/opt/SUNWspro/bin/cc"
+    LIBS="-lMesaglut -lMesaGLU  -lMesaGL -lXext -lXi -lXmu -lX11 -lsocket -lm"
+    LIBDIRS="-L/soft/X11R6.3/lib"
+    EXTRALIBS="-R/soft/X11R6.3/lib -ljpeg"
+    INCDIRS="-I/soft/X11R6.3/include"
+    CFLAGS="-xO5 -Dinline="
+    ;;
+
+  IRIX)
+    CC="cc"
+    LDFLAGS="-Ofast=ip22_4k -lglut -lGLU -lGL -lXmu -lX11 -lm"
+    EXTRALIBS="-ljpeg"
+    CFLAGS="-Ofast=ip22_4k -Dinline="
+    ;;
+
+  IRIX_gcc)
+    CC="gcc"
+    LDFLAGS="-lglut -lGLU -lGL -lXmu -lX11 -lm"
+    EXTRALIBS="-ljpeg"
+    CFLAGS="-O2 -Dinline="
+    ;;
+
+  Darwin)
+    CC="gcc"
+    LIBS="-lobjc -lm"
+    LDFLAGS="-O3"
+    LIBDIRS="-L$(JPEG_DIR)/lib"
+    EXTRALIBS="-framework GLUT -framework OpenGL -ljpeg"
+    INCDIRS="-I/System/Library/Frameworks/GLUT.framework/Headers -I/System/Library/Frameworks/OpenGL.framework/Headers -I$(JPEG_DIR)/include"
+    CFLAGS="-O3"
+    JPEG_DIR="/usr/local/jpeg"
+    ;;
+
+  *)
+    echo Unknown hardware you will probably have problems compiling viewer
+    ;;
+
+esac
+
+AC_OUTPUT(Makefile)

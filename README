@@ -1,82 +1,249 @@
 building viewer:
 ----------------
 
-simply typing 'make' should build the program. this uses a roughly
-hacked together script called 'glcc' that i've used to compile opengl
-applications on several architectures here at the university of
-minnesota. at some point i'll probably move to a solution involving
-autoconf, but this was the easiest.
+Building viewer should now work on many platforms due to the use of 
+autoconf. To build viewer do the following:
+
+./configure
+make
+make strip [this step optional]
+make install
+
+if for some reason this doesnt 'just work' for you, please let me know 
+so that i can fix the build script.
+
+note: although i've put some basic stuff for JPG images in, this release 
+still only supports PPM images.
 
 usage:
 ------
 
-viewer [basename]
-       will read basename-l.ppm and basename-r.ppm as left and right
-images
-       and will write basename-leftcrop.ppm, basename-rightcrop.ppm,
-       and basename-pair.ppm
-viewer [options]
-       -i leftinfile.ppm rightinfile.ppm
-       -v fullinfile.ppm
-       -o fulloutfile.ppm [default = fullout.ppm]
-       -l leftoutfile.ppm [default = leftout.ppm]
-       -r rightoutfile.ppm [default = rightout.ppm]
+this usage information is taken straight from the manpage.
 
-must contain either the -i or -v options or only basename.
-if the -o, -l, or -r options are omitted default will be used
+VIEWER(1)                                               VIEWER(1)
 
-commands within program:
-cursor keys             move left image by 1 pixel
-cursor keys+shift       move right image by 1 pixel
-cursor keys+alt         move both images by 1 pixel
-cursor keys+ctrl        move left image by 10 pixels
-cursor keys+shift+ctrl  move right image by 10 pixels
-cursor keys+shift+alt   move both images by 10 pixels
-esc or q                quit
-enter                   write images
+NAME
+       viewer - stereo pair viewer/aligner
 
-enter+shift             write images and quit
+SYNOPSIS
+       viewer [ options ] [ file(s) ]
 
+       viewer [ basename ]
 
-program execution examples:
----------------------------
+DESCRIPTION
+       viewer  is an OpenGL based stereo pair viewer and aligner.
+       At present it only accepts images in the PPM image  format
+       but work is in progress to allow use of other image types.
+       viewer is known to  work  on  various  systems,  including
+       Linux and OSX, but should work on anything with OpenGL and
+       a compiler. Besides being useful as a stereo  pair  viewer
+       it  is  also  possible  to  view  a  mono image and easliy
+       pan/drag around within the image.
 
-	viewer pair0611b
+       There are three modes in which to use viewer : as  a  mono
+       viewer  (with the -m option), as a stereo viewer (with the
+       -i or -v option), or as a stereo pair aligner (with the -a
+       option).  There  is  an additional special way that viewer
+       can be run: if no arguments are given and  only  an  image
+       'basename'  is  given the program will load basename-l.ppm
+       and basename-r.ppm and enter viewer mode. This can be very
+       convenient  for  viewing already aligned image pairs using
+       the default configuration. If the program is  not  run  in
+       with  a  basename  then  one  of  the -m , -v , -i , or -a
+       options must be used. The -o , -l ,  and  -r  options  are
+       only  useful when running in aligner mode. If viewer is run
+       using basename it enters aligner mode.
 
-will read pair0611b-l.ppm as the left image and pair0611b-r.ppm as the
-right image. when the image is cropped (by pressing enter) the files
-pair0611b-leftcrop.ppm, pair0611b-rightcrop.ppm, and pair0611b-pair.ppm
-will be written.
+       Additionally it is possible to pass the -g option to spec­
+       ify  the  window  size. If this option is omitted then the
+       window will cover the entire desktop.
 
-	viewer -i pair0611b-l.ppm pair0611b-r.ppm
+       Depending upon which mode the program is  running  in  the
+       cursor  keys  will vary. In viewer mode it is assumed that
+       both images will be moved together and that not much 'fine
+       tuning'  will be necessary, so by default movement is over
+       the image in the specified direction in increments  of  10
+       pixels.  If  SHIFT is used in combination with cursor keys
+       then movement will be in increments of 1 pixel.  In  addi­
+       tion,  the  user  can  press  a to temporarily enter 'fine
+       alignment' mode. In this mode the cursor key behavior acts
+       as  if  the program were in aligner mode until this key is
+       hit again to return to the standard viewer behaviour.
 
-is equivalent to the above command in that it will read the same two
-files, however the default output filenames will be leftout.ppm,
-rightout.ppm, and fullout.ppm rather than the above.
+       The keyboard behavior of mono viewer mode is identical  to
+       standard  viewer  mode with the exception that there is no
+       fine alignment mode.
 
-	viewer -i pair0611b-l.ppm pair0611b-r.ppm -l cropleft.ppm \
-               -r cropright.ppm -o stereoimage.ppm
+       In alignment mode the cursor key interaction  is  slightly
+       more  complicated  due to the extra flexibility necessary.
+       It is known that some window managers (notably  KDE)  will
+       intercept  some  of  these keyboard commands. The user may
+       wish to redefine the behaviour of the  window  manager  to
+       avoid this. Future plans for viewer include the ability to
+       use user-defined keyboard commands to avoid this  problem.
 
-this again reads the same two images, however rather than using the
-default output filenames it will write the cropped and stereo images to
-the specified filenames. if any of the output options are omitted the
-default will be used.
+OPTIONS
+       The options are:
 
-	viewer -v pair0611b-pair.ppm
+       -h     Display usage and version information and exit
 
-this will simply allow you to view the cropped and aligned stereo pair
-which was created in the first example above.
+       -i [leftimage.ppm rightimage.ppm]
+              Display a pair of images in viewer mode
 
-author contact:
----------------
+       -v [fullimage.ppm]
+              Display  a  combined pair of images in viewer mode.
+              assumes left half of image is left  eye  image  and
+              right half of image is right eye image.
 
-questions/comments/suggestions welcome.
+       -m [monoimage.ppm]
+              Display a mono image in viewer mode
 
-Russ Burdick
-<wburdick@cs.umn.edu>
+       -a [leftinfile.ppm rightinfile.ppm]
+              Display a pair of images in aligner mode
 
-license:
---------
+       -o [fulloutfile.ppm]
+              Specify  the  output file for a joined stereo pair.
+              Default value is fullout.ppm. This option  is  only
+              useful in aligner mode.
 
-this software is covered under the GNU Public License as outlined in the
-COPYING file included with this distribution.
+       -l [leftoutfile.ppm]
+              Specify  the  output  file  for  the left half of a
+              stereo pair. Default  value  is  leftout.ppm.  This
+              option is only useful in aligner mode.
+
+       -r [rightoutfile.ppm]
+              Specify  the  output  file  for the right half of a
+              stereo pair. Default value  is  rightout.ppm.  This
+              option is only useful in aligner mode.
+
+       -g [WIDTHxHEIGHT]
+              Forces  viewer  to use a specified window geometry.
+              The default behavior is to cover the  entire  desk­
+              top.
+
+viewer mode commands
+       these are the commands available while in viewer mode:
+
+       q, ESC quit
+
+       a      toggle  'fine  alignment'  mode  on/off.  this will
+              cause the cursor keys  to  temporarily  act  as  in
+              aligner mode.
+
+       x      zoom out
+
+       z      zoom in
+
+       c      center images
+
+       LEFT   move left over image by 10 pixels
+
+       SHIFT+LEFT
+              move left over image by 1 pixel
+
+       RIGHT  move right over image by 10 pixels
+
+       SHIFT+RIGHT
+              move right over image by 1 pixel
+
+       UP     move up over image by 10 pixels
+
+       SHIFT+UP
+              move up over image by 1 pixel
+
+       DOWN   move down over image by 10 pixels
+
+       SHIFT+DOWN
+              move down over image by 1 pixel
+
+mono viewer mode commands
+       the  commands  for mono viewer mode are identical to stan­
+       dard viewer mode, however there is no fine alignment since
+       there is only a single image.
+
+aligner mode commands
+       these are the commands available in aligner mode:
+
+       q, ESC quit
+
+       ENTER  crop  images  to  screen and write left, right, and
+              joined images
+
+       SHIFT+ENTER
+              crop images to screen and write  left,  right,  and
+              joined images, then immediately exit
+
+       LEFT, RIGHT, UP, DOWN
+              move left image 1 pixel in specified direction
+
+       CTRL+(LEFT, RIGHT, UP, DOWN)
+              move left image 10 pixels in specified direction
+
+       SHIFT+(LEFT, RIGHT, UP, DOWN)
+              move right image 1 pixel in specified direction
+
+       SHIFT+CTRL+(LEFT, RIGHT, UP, DOWN)
+              move right image 10 pixels in specified direction
+
+       ALT+(LEFT, RIGHT, UP, DOWN)
+              move both images 1 pixel in specified direction
+
+       ALT+CTRL+(LEFT, RIGHT, UP, DOWN)
+              move both images 10 pixels in specified direction
+
+EXAMPLES
+            viewer pair0611b
+
+       will read pair0611b-l.ppm as the left image and pair0611b-
+       r.ppm as the right image. when the image  is  cropped  (by
+       pressing    enter)   the   files   pair0611b-leftcrop.ppm,
+       pair0611b-rightcrop.ppm, and  pair0611b-pair.ppm  will  be
+       written.
+
+            viewer -a pair0611b-l.ppm pair0611b-r.ppm
+
+       is  equivalent  to  the above command in that it will read
+       the same two files, however the default  output  filenames
+       will  be leftout.ppm, rightout.ppm, and fullout.ppm rather
+       than the above.
+
+            viewer   -a   pair0611b-l.ppm   pair0611b-r.ppm    -l
+       cropleft.ppm -r cropright.ppm -o stereoimage.ppm
+
+       this  again reads the same two images, however rather than
+       using the default  output  filenames  it  will  write  the
+       cropped  and  stereo images to the specified filenames. if
+       any of the output options are omitted the default will  be
+       used.
+
+            viewer -v pair0611b-pair.ppm
+
+       this will simply allow you to view the cropped and aligned
+       stereo pair which was created in the first example  above.
+
+            viewer -m monoimage.ppm
+
+       this will read a single image in mono viewer mode.
+
+            viewer -i lefty.ppm righty.ppm -g 1024x384
+
+       will  load  the  specified pair in viewer mode in a window
+       covering the upper half of a 1024x768 desktop.
+
+ENVIRONMENT
+       No special environment variables.
+
+LICENSE
+       This software is covered under the GNU Public  License  as
+       outlined  in the COPYING file included with this distribu­
+       tion.
+
+AUTHOR
+       Russ Burdick <wburdick@cs.umn.edu>
+
+BUGS
+       No known bugs at this time. Please send bug reports to the
+       author.
+
+                           May 24 2002                  VIEWER(1)
+

@@ -1,0 +1,48 @@
+# Makefile - viewer-0.7.0
+# Russ Burdick 2001-2002
+
+#DEBUG = -DDEBUG -g
+
+# ---- @OS_TYPE@/@ARCH_TYPE@ ----
+CC = @CC@
+DEFINES = -DOS_@OS_TYPE@ -DARCH_@ARCH_TYPE@
+CFLAGS = @CFLAGS@ @INCDIRS@ ${DEFINES} ${DEBUG}
+LDFLAGS = @LIBDIRS@ @LDFLAGS@ @EXTRALIBS@
+LIBS = @LIBS@
+JPEG_DIR = @JPEG_DIR@
+
+INSTALL = @INSTALL@
+STRIP = strip
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+mandir = @mandir@/man1
+
+OBJ = viewer.o align.o main.o example.o mono.o
+
+all: viewer
+
+.PHONY: clean cleandist dep 
+clean:
+	rm -f viewer core *.o
+
+distclean: clean
+	rm -f *~ config.status config.cache config.log config.h Makefile
+
+viewer: $(OBJ)
+	$(CC) -o viewer $(OBJ) $(LDFLAGS) $(LIBS)
+
+install: viewer viewer.1
+	$(INSTALL) --mode=0755 viewer $(bindir)
+	$(INSTALL) --mode=0644 viewer.1 $(mandir)
+
+uninstall:
+	rm -f $(bindir)/viewer
+	rm -f $(mandir)/viewer.1
+
+strip: viewer
+	$(STRIP) viewer
+
+.c.o:
+	$(CC) -c $(CFLAGS) $< 

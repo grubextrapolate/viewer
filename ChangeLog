@@ -1,3 +1,8 @@
+0.7.0:
+-made alignment function secondary, viewer function primary and because
+ of this expanded upon the viewer functionality and simplified some of
+ it's key interaction
+
 0.6.1:
 -preparation for mass distribution
 -added AUTHORS, COPYING, ChangeLog, README files
