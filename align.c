@@ -366,12 +366,19 @@ void menuFuncAlign(int item) {
  */
 void resizeFuncAlign(int height, int width) {
 
-   glutReshapeWindow(screen_x*2, screen_y);
-   glViewport(0, 0, screen_x*2, screen_y);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   gluOrtho2D(0, screen_x*2, 0, screen_y);
-
+   if (clone) {
+      glutReshapeWindow(screen_x, screen_y);
+      glViewport(0, 0, screen_x, screen_y);
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      gluOrtho2D(0, screen_x, 0, screen_y);
+   } else {
+      glutReshapeWindow(screen_x*2, screen_y);
+      glViewport(0, 0, screen_x*2, screen_y);
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      gluOrtho2D(0, screen_x*2, 0, screen_y);
+   }
 }
 
 void mouseFuncAlign(int button, int state, int x, int y) {

@@ -102,13 +102,13 @@ int main(int argc, char **argv) {
 #endif
          screen_y = glutGet(GLUT_SCREEN_HEIGHT);
 
-         if (clone) screen_x *= 2;
-
       } else {
 #ifndef OS_Darwin
          screen_x = screen_x/2;
 #endif
       }
+
+      if (clone) screen_x *= 2;
 
       debug("main: screen_x = %d, screen_y = %d\n", screen_x, screen_y);
 
@@ -293,6 +293,10 @@ void processArgs(int argc, char **argv) {
          if (i+1 < argc) {
             i++;
             mode = MONOVIEW;
+            if (clone) {
+               printf("stereo mode is incompatible with mono viewing. stereo option ignored.\n");
+               clone = FALSE;
+            }
             ptr = newPair(argv[i], NULL);
             addPair(ptr, &list);
          } else {
@@ -378,11 +382,18 @@ void processArgs(int argc, char **argv) {
                  (strcmp(argv[i], "--stereo") == 0)) {
          /*
           * Verify that stereo actually is available.
+          * this test doesnt work, so it's commented out. if you try to 
+          * enable stereo mode and dont support it the system will bail 
+          * out anyway.
          if (!stereoCheck())
            die("This system does not support stereo.\n");
           */
 
-         clone = TRUE;
+         if (mode == MONOVIEW) {
+            printf("stereo mode is incompatible with mono viewing. stereo option ignored.\n");
+         } else {
+            clone = TRUE;
+         }
       } else if (argc == 2) {
          basename = argv[1];
          strcpy(buf, argv[1]);

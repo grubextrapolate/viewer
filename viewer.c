@@ -27,12 +27,19 @@ void displayFuncView(void) {
 
          /* at least one edge showing, so blank */
          debug("displayFuncView: blanking screen\n");
-         glClear(GL_COLOR_BUFFER_BIT);
 
+         if (clone) {
+            glDrawBuffer(GL_LEFT);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glDrawBuffer(GL_RIGHT);
+            glClear(GL_COLOR_BUFFER_BIT);
+         } else {
+            glClear(GL_COLOR_BUFFER_BIT);
+         }
       } else { /* no edges showing, dont blank */
          debug("displayFuncView: no screen blank needed\n");
       }
-          
+
       if ((left->width >= 0) && (left->height >= 0)) {
 
          if (left->x < 0) rx = 0;
@@ -45,18 +52,21 @@ void displayFuncView(void) {
          r = left->width*RGBA;
          off = RGBA*(left->y1*left->width+left->x1);
 
-         for (i = 0; i < h; i++) {
-            if (clone) {
+         if (clone) {
+            for (i = 0; i < h; i++) {
                glDrawBuffer(GL_LEFT);
                glRasterPos2i(rx, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                             left->tex+off);
-            } else {
+               off += r;
+            }
+         } else {
+            for (i = 0; i < h; i++) {
                glRasterPos2i(rx, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                             left->tex+off);
+               off += r;
             }
-            off += r;
          }
          showPos(left, 0, 0, LEFT);
       }
@@ -306,12 +316,19 @@ void menuFuncView(int item) {
  */
 void resizeFuncView(int height, int width) {
 
-   glutReshapeWindow(screen_x*2, screen_y);
-   glViewport(0, 0, screen_x*2, screen_y);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   gluOrtho2D(0, screen_x*2, 0, screen_y);
-
+   if (clone) {
+      glutReshapeWindow(screen_x, screen_y);
+      glViewport(0, 0, screen_x, screen_y);
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      gluOrtho2D(0, screen_x, 0, screen_y);
+   } else {
+      glutReshapeWindow(screen_x*2, screen_y);
+      glViewport(0, 0, screen_x*2, screen_y);
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      gluOrtho2D(0, screen_x*2, 0, screen_y);
+   }
 }
 
 void mouseFuncView(int button, int state, int x, int y) {
