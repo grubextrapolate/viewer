@@ -17,6 +17,13 @@
    #include <unistd.h>
 #endif
 
+#define ALIGN 0
+#define VIEWER 1
+#define MONOVIEW 2
+
+#define RGB 3
+#define RGBA 4
+
 #ifndef TRUE
 #define TRUE 1
 #endif
@@ -94,6 +101,7 @@ extern char *rightOutfile;
 extern char *basename;
 extern int mode;
 extern int zoom;
+extern double szoom;
 extern int mousex1;
 extern int mousey1;
 extern int fine_align;
@@ -104,6 +112,12 @@ extern int y_offset;
 extern PAIRLIST *list;
 extern int clone;
 extern int fullscreen;
+
+extern int leftDown;
+extern int middleDown;
+extern int rightDown;
+extern int loading;
+extern double progress;
 
 /* function prototypes for viewer */
 void displayFuncView(void); /* the display function (for viewer) */
@@ -142,7 +156,8 @@ void die(char *, ...);
 void debug(char *, ...);
 int ipow(int, int);
 TEXTURE *zoomImage(TEXTURE *, int);
-void showPos(TEXTURE *, int, int, int);
+TEXTURE *zoomImageSmooth(TEXTURE *, double);
+void showPos(TEXTURE *, int, TEXTURE *);
 TEXTURE *makeThumb(TEXTURE *);
 int isjpeg(char *);
 void drawBox(int, int, int, int, int *color, int);
@@ -153,6 +168,7 @@ void getNextPair(PAIRLIST *);
 void getPrevPair(PAIRLIST *);
 void freeTexture(TEXTURE **);
 int stereoCheck();
+void drawProgress(double);
 
 /* function prototypes for example */
 TEXTURE *read_JPEG_file (char *);

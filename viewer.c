@@ -1,6 +1,9 @@
 #include "viewer.h"
 
 int zooming = FALSE;
+int leftDown = FALSE;
+int rightDown = FALSE;
+int middleDown = FALSE;
 
 /*
  * display function for VIEWER mode. draws the full stereo image across
@@ -20,7 +23,7 @@ void displayFuncView(void) {
       first_time = FALSE;
    }
 
-   if (zoom == 0) {
+   if ((zoom == 0) && (szoom == 1)) {
 
       if ((left->x > 0) || (left->x + left->width < screen_x) ||
           (left->y > 0) || (left->y + left->height < screen_y) ||
@@ -70,7 +73,7 @@ void displayFuncView(void) {
                off += r;
             }
          }
-         showPos(left, 0, 0, LEFT);
+         showPos(left, LEFT, NULL);
       }
       if ((right->width >= 0) && (right->height >= 0)) {
 
@@ -97,12 +100,18 @@ void displayFuncView(void) {
             }
             off += r;
          }
-         showPos(right, 0, 0, RIGHT);
+         showPos(right, RIGHT, NULL);
       }
+
    } else {
 
-      zleft = zoomImage(left, zoom);
-      zright = zoomImage(right, zoom);
+      if (zoom == 0) {
+         zleft = zoomImageSmooth(left, szoom);
+         zright = zoomImageSmooth(right, szoom);
+      } else {
+         zleft = zoomImage(left, zoom);
+         zright = zoomImage(right, zoom);
+      }
 
       if ((zleft->x > 0) || (zleft->x + zleft->width < screen_x) ||
           (zleft->y > 0) || (zleft->y + zleft->height < screen_y) ||
@@ -141,7 +150,7 @@ void displayFuncView(void) {
             }
             off += r;
          }
-/*         showPos(zleft, 0, 0, LEFT);*/
+         showPos(zleft, LEFT, left);
       }
       if ((zright->width >= 0) && (zright->height >= 0)) {
          if (zright->x < 0) rx = 0;
@@ -167,7 +176,7 @@ void displayFuncView(void) {
             }
             off += r;
          }
-/*         showPos(zright, 0, 0, RIGHT);*/
+         showPos(zright, RIGHT, right);
       }
       free(zleft);
       free(zright);
@@ -201,6 +210,7 @@ void keyboardFuncView(unsigned char key, int x, int y) {
          getPrevPair(list);
          glutPostRedisplay();
          break;
+
       case 'z': /* zoom in */
       case 'Z':
          zoom++;
@@ -211,6 +221,17 @@ void keyboardFuncView(unsigned char key, int x, int y) {
          zoom--;
          glutPostRedisplay();
          break;
+      case 'v': /* smooth zoom in */
+      case 'V':
+         szoom += 0.1;
+         glutPostRedisplay();
+         break;
+      case 'b': /* smooth zoom out */
+      case 'B':
+         szoom -= 0.1;
+         glutPostRedisplay();
+         break;
+
       case 'a': /* toggle fine_align mode */
       case 'A':
          if (fine_align)
@@ -219,6 +240,7 @@ void keyboardFuncView(unsigned char key, int x, int y) {
             glutSpecialFunc(specialFuncAlign);
          fine_align = ! fine_align;
          break;
+
       case 'c': /* center */
       case 'C':
          left->x = (screen_x - left->width)/2;
@@ -229,14 +251,58 @@ void keyboardFuncView(unsigned char key, int x, int y) {
          calcWindow(right);
          glutPostRedisplay();
          break;
+      case 'h': /* home (center and un-zoomed) */
+      case 'H':
+         szoom = 1;
+         left->x = (screen_x - left->width)/2;
+         left->y = (screen_y - left->height)/2;
+         calcWindow(left);
+         right->x = (screen_x - right->width)/2;
+         right->y = (screen_y - right->height)/2;
+         calcWindow(right);
+         glutPostRedisplay();
+         break;
+
       case 'q': /* q or escape to exit */
       case 'Q':
       case 27:
          exit(0);
          break;
+
       case 'r': /* r to re-display at (0,0) */
       case 'R':
          glutPositionWindow(0, 0);
+         break;
+
+      case '1': /* actual size */
+         szoom = 1;
+         glutPostRedisplay();
+         break;
+
+      case 'd': /* double size */
+      case 'D':
+         szoom = 2;
+         glutPostRedisplay();
+         break;
+
+      case '2': /* 1/2 size */
+         szoom = 0.5;
+         glutPostRedisplay();
+         break;
+
+      case '3': /* 1/4 size */
+         szoom = 0.25;
+         glutPostRedisplay();
+         break;
+
+      case '4': /* 1/8 size */
+         szoom = 0.125;
+         glutPostRedisplay();
+         break;
+
+      case '5': /* 1/16 size */
+         szoom = 0.0625;
+         glutPostRedisplay();
          break;
 
       default:
@@ -253,6 +319,14 @@ void specialFuncView(int key, int x, int y) {
    debug("specialFuncView: key is %d\n", key);
 
    switch(key) {
+      case GLUT_KEY_PAGE_UP: /* prev pair */
+         getPrevPair(list);
+         glutPostRedisplay();
+         break;
+      case GLUT_KEY_PAGE_DOWN: /* next pair */
+         getNextPair(list);
+         glutPostRedisplay();
+         break;
       case GLUT_KEY_LEFT:
          if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) {
             left->x++;
@@ -341,20 +415,33 @@ void mouseFuncView(int button, int state, int x, int y) {
 
    if ((button == GLUT_MIDDLE_BUTTON) && (state == GLUT_DOWN)) {
       debug("mouseFuncView: mouse middle down at (%d,%d)\n", x, y);
+      middleDown = TRUE;
       mousex1 = x;
       mousey1 = y;
    } else if ((button == GLUT_MIDDLE_BUTTON) && (state == GLUT_UP)) {
       debug("mouseFuncView: mouse middle up at (%d,%d)\n", x, y);
+      middleDown = FALSE;
    }
 
    if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_DOWN)) {
       debug("mouseFuncView: mouse left down at (%d,%d)\n", x, y);
+      leftDown = TRUE;
       mousex1 = x;
       mousey1 = y;
    } else if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP)) {
       debug("mouseFuncView: mouse left up at (%d,%d)\n", x, y);
+      leftDown = FALSE;
    }
 
+   if ((button == GLUT_RIGHT_BUTTON) && (state == GLUT_DOWN)) {
+      debug("mouseFuncView: mouse right down at (%d,%d)\n", x, y);
+      rightDown = TRUE;
+      mousex1 = x;
+      mousey1 = y;
+   } else if ((button == GLUT_RIGHT_BUTTON) && (state == GLUT_UP)) {
+      debug("mouseFuncView: mouse right up at (%d,%d)\n", x, y);
+      rightDown = FALSE;
+   }
 }
 
 void motionFuncView(int x, int y) {
@@ -367,12 +454,24 @@ void motionFuncView(int x, int y) {
    mousey1 = y;
    debug("motionFuncView: mouse moved to (%d,%d), dx=%d, dy=%d\n", x, y, dx, dy);
 
-   left->x += dx;
-   right->x += dx;
-   left->y -= dy;
-   right->y -= dy;
-   calcWindow(left);
-   calcWindow(right);
+   if (leftDown || middleDown) {
+      left->x += dx;
+      right->x += dx;
+      left->y -= dy;
+      right->y -= dy;
 
-   glutPostRedisplay();
+      calcWindow(left);
+      calcWindow(right);
+
+      glutPostRedisplay();
+
+   } else if (rightDown) {
+
+      szoom += (float)dy/100;
+
+      calcWindow(left);
+      calcWindow(right);
+
+      glutPostRedisplay();
+   }
 }

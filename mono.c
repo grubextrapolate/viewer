@@ -1,5 +1,7 @@
 #include "viewer.h"
 
+double progress = 0;
+
 /*
  * display function for MONO mode. draws the image across
  * both desktops (both eyes). uses double buffering for drawing.
@@ -48,7 +50,7 @@ void displayFuncViewMono(void) {
                          left->tex+off);
             off += r;
          }
-         showPos(left, 0, 0, LEFT);
+         showPos(left, LEFT, NULL);
       }
    } else {
 
@@ -82,12 +84,12 @@ void displayFuncViewMono(void) {
                          zleft->tex+off);
             off += r;
          }
-/*         showPos(zleft, 0, 0, LEFT);*/
+/*         showPos(zleft, LEFT, left);*/
       }
       free(zleft);
 
    }
-
+drawProgress(progress);
    glutSwapBuffers();
 }
 
@@ -140,6 +142,17 @@ void keyboardFuncViewMono(unsigned char key, int x, int y) {
       case 'r': /* r to re-display at (0,0) */
       case 'R':
          glutPositionWindow(0, 0);
+         break;
+
+      case 'a':
+         progress += 0.01;
+         if (progress > 1) progress = 1;
+         glutPostRedisplay();
+         break;
+      case 'A':
+         progress -= 0.01;
+         if (progress < 0) progress = 0;
+         glutPostRedisplay();
          break;
 
       default:

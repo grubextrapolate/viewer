@@ -55,7 +55,7 @@ void displayFuncAlign(void) {
          }
          off += r;
       }
-      showPos(left, 0, 0, LEFT);
+      showPos(left, LEFT, NULL);
    }
    if ((right->width >= 0) && (right->height >= 0)) {
 
@@ -82,7 +82,7 @@ void displayFuncAlign(void) {
          }
          off += r;
       }
-      showPos(right, 0, 0, RIGHT);
+      showPos(right, RIGHT, NULL);
    }
    glutSwapBuffers();
 }
