@@ -121,13 +121,13 @@ int main(int argc, char **argv) {
       full->width = screen_x*2;
       full->height = screen_y;
       full->tex = (GLubyte *)malloc(full->width*full->height*
-                                    RGBA*sizeof(GLubyte));
+                                    RGB*sizeof(GLubyte));
       if (full->tex == NULL) die("main: malloc failure\n");
 
       for (i = 0; i < full->height; i++) {
          for (j = 0; j < full->width; j++) {
-            for (k = 0; k < RGBA; k++) {
-               *(full->tex + (RGBA*(i*
+            for (k = 0; k < RGB; k++) {
+               *(full->tex + (RGB*(i*
                   full->width+j)+k)) = (GLubyte) 0;
             }
          }

@@ -23,9 +23,6 @@
 #define VIEWER 1
 #define MONOVIEW 2
 
-#define RGB 3
-#define RGBA 4
-
 #ifndef TRUE
 #define TRUE 1
 #endif
@@ -39,7 +36,6 @@
 #define BOTH 2
 
 #define RGB 3
-#define RGBA 4
 #define STRING_SIZE 132
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))

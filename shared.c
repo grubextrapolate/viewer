@@ -155,21 +155,21 @@ void readAndSplit(char *filename) {
          left->width, left->height, right->width, right->height);
 
    left->tex = (GLubyte *)malloc(left->height*left->width*
-                                 RGBA*sizeof(GLubyte));
+                                 RGB*sizeof(GLubyte));
    if (left->tex == NULL) die("readAndSplit: error mallocing texture\n");
 
    right->tex = (GLubyte *)malloc(right->height*right->width*
-                                  RGBA*sizeof(GLubyte));
+                                  RGB*sizeof(GLubyte));
    if (right->tex == NULL) die("readAndSplit: error mallocing texture\n");
 
    for (i = 0; i < tmp->height; i++) {
 
-      memcpy(left->tex + RGBA*(i*left->width),
-             tmp->tex + RGBA*(i*tmp->width),
-             RGBA*left->width);
-      memcpy(right->tex + RGBA*(i*right->width),
-             tmp->tex + RGBA*(i*tmp->width+left->width-1),
-             RGBA*right->width);
+      memcpy(left->tex + RGB*(i*left->width),
+             tmp->tex + RGB*(i*tmp->width),
+             RGB*left->width);
+      memcpy(right->tex + RGB*(i*right->width),
+             tmp->tex + RGB*(i*tmp->width+left->width-1),
+             RGB*right->width);
    }
    free(tmp->tex);
    free(tmp);
@@ -235,7 +235,7 @@ TEXTURE *read_texture(char *infilename) {
    tex->height = img_height;
    tex->thumb = NULL;
    tex->tex = (GLubyte *)malloc(img_height*img_width*
-                                RGBA*sizeof(GLubyte));
+                                RGB*sizeof(GLubyte));
    if (tex->tex == NULL) die("read_texture: error mallocing texture\n");
 
    if (ascii) { /* ascii ppm */
@@ -245,11 +245,11 @@ TEXTURE *read_texture(char *infilename) {
          for (j=0; j<img_width; j++) {
             fscanf(infile, "%d %d %d", &r, &g, &b);
 
-            *(tex->tex + (RGBA*((img_height-1-i)*img_width+j))) =
+            *(tex->tex + (RGB*((img_height-1-i)*img_width+j))) =
                (GLubyte) r;
-            *(tex->tex + (RGBA*((img_height-1-i)*img_width+j)+1)) =
+            *(tex->tex + (RGB*((img_height-1-i)*img_width+j)+1)) =
                (GLubyte) g;
-            *(tex->tex + (RGBA*((img_height-1-i)*img_width+j)+2)) =
+            *(tex->tex + (RGB*((img_height-1-i)*img_width+j)+2)) =
                (GLubyte) b;
          }
       }
@@ -268,7 +268,7 @@ TEXTURE *read_texture(char *infilename) {
       for (i=0; i<img_height; i++) {
          for (j=0; j<img_width; j++) {
             for (k = 0; k < RGB; k++) {
-               *(tex->tex + (RGBA*((img_height-1-i)*img_width+j)+k)) =
+               *(tex->tex + (RGB*((img_height-1-i)*img_width+j)+k)) =
                   (GLubyte) ibuffer[l++];
             }
          }
@@ -309,7 +309,7 @@ void write_texture(char *filename, TEXTURE *tex) {
       for (j = 0; j < tex->width; j++) {
          for (k = 0; k < RGB; k++) {
             ibuffer[l++] = (unsigned char)
-               *(tex->tex + (RGBA*((tex->height-1-i)*tex->width+j)+k));
+               *(tex->tex + (RGB*((tex->height-1-i)*tex->width+j)+k));
          }
       }
    }
@@ -349,7 +349,7 @@ void write_cropped_texture(char *filename, TEXTURE *tex, int x1, int x2,
       for (j = x1; j < x2; j++) {
          for (k = 0; k < RGB; k++) {
             ibuffer[l++] = (unsigned char)
-               *(tex->tex + (RGBA*((tex->height-1-i)*tex->width+j)+k));
+               *(tex->tex + (RGB*((tex->height-1-i)*tex->width+j)+k));
          }
       }
    }
@@ -481,7 +481,7 @@ TEXTURE *read_image(char *infilename) {
    tex->width = img_width;
    tex->height = img_height;
    tex->tex = (GLubyte *)malloc(img_height*img_width*
-                                RGBA*sizeof(GLubyte));
+                                RGB*sizeof(GLubyte));
    if (tex->tex == NULL) die("read_image: error mallocing texture\n");
 
    ibuffer = (unsigned char *) malloc(img_height*img_width*3);
@@ -494,11 +494,11 @@ TEXTURE *read_image(char *infilename) {
          for (j=0; j<img_width; j++) {
             fscanf(infile, "%d %d %d", &r, &g, &b);
 
-            *(tex->tex + (RGBA*((img_height-1-i)*img_width+j))) =
+            *(tex->tex + (RGB*((img_height-1-i)*img_width+j))) =
                (GLubyte) r;
-            *(tex->tex + (RGBA*((img_height-1-i)*img_width+j)+1)) =
+            *(tex->tex + (RGB*((img_height-1-i)*img_width+j)+1)) =
                (GLubyte) g;
-            *(tex->tex + (RGBA*((img_height-1-i)*img_width+j)+2)) =
+            *(tex->tex + (RGB*((img_height-1-i)*img_width+j)+2)) =
                (GLubyte) b;
          }
       }
@@ -514,7 +514,7 @@ TEXTURE *read_image(char *infilename) {
       for (i=0; i<img_height; i++) {
          for (j=0; j<img_width; j++) {
             for (k = 0; k < RGB; k++) {
-               *(tex->tex + (RGBA*((img_height-1-i)*img_width+j)+k)) =
+               *(tex->tex + (RGB*((img_height-1-i)*img_width+j)+k)) =
                   (GLubyte) ibuffer[l++];
             }
          }
@@ -559,18 +559,18 @@ TEXTURE *zoomImageSmooth(TEXTURE *orig, double zoomfac) {
 
    if ((ret->width >= 0) && (ret->height >= 0)) {
       ret->tex = (GLubyte *)malloc(ret->height*ret->width*
-                                   RGBA*sizeof(GLubyte));
+                                   RGB*sizeof(GLubyte));
       if (ret->tex == NULL) die("zoomImageSmooth: error mallocing texture\n");
 
       for (i = ret->y1; i < ret->y2; i++) {
          for (j = ret->x1; j < ret->x2; j++) {
-            off = RGBA*((int) (((int) ((float)i/a))*orig->width + 
+            off = RGB*((int) (((int) ((float)i/a))*orig->width + 
                                ((float)j/a)));
             r = (int) *(orig->tex + off);
             g = (int) *(orig->tex + off + 1);
             b = (int) *(orig->tex + off + 2);
 
-            off = RGBA*((i-ret->y1)*ret->width+(j-ret->x1));
+            off = RGB*((i-ret->y1)*ret->width+(j-ret->x1));
             *(ret->tex + off) = (GLubyte) r;
             *(ret->tex + off + 1) = (GLubyte) g;
             *(ret->tex + off + 2) = (GLubyte) b;
@@ -638,7 +638,7 @@ TEXTURE *makeThumb(TEXTURE *orig) {
       debug("makeThumb: ret->height=%d, ret->width=%d\n", ret->height, 
             ret->width);
       ret->tex = (GLubyte *)malloc(ret->height*ret->width*
-                                   RGBA*sizeof(GLubyte));
+                                   RGB*sizeof(GLubyte));
       if (ret->tex == NULL) die("makeThumb: error mallocing texture\n");
 
       for (i = 0; i < ret->height; i++) {
@@ -650,7 +650,7 @@ TEXTURE *makeThumb(TEXTURE *orig) {
             if (y == 0) y = a;
             for (k = 0; k < x; k++) {
                for (l = 0; l < y; l++) {
-                  off = RGBA*((i*a+k)*orig->width+(j*a+l));
+                  off = RGB*((i*a+k)*orig->width+(j*a+l));
                   r += (int) *(orig->tex + off);
                   g += (int) *(orig->tex + off + 1);
                   b += (int) *(orig->tex + off + 2);
@@ -659,7 +659,7 @@ TEXTURE *makeThumb(TEXTURE *orig) {
             r = r/(x*y);
             g = g/(x*y);
             b = b/(x*y);
-            off = RGBA*(i*ret->width+j);
+            off = RGB*(i*ret->width+j);
             *(ret->tex + off) = (GLubyte) r;
             *(ret->tex + off + 1) = (GLubyte) g;
             *(ret->tex + off + 2) = (GLubyte) b;
@@ -762,7 +762,7 @@ boxy);
             glDrawBuffer(GL_BACK);
          }
          glRasterPos2i(x, y);
-         glDrawPixels(thumb->thumb->width, thumb->thumb->height, GL_RGBA, 
+         glDrawPixels(thumb->thumb->width, thumb->thumb->height, GL_RGB, 
                       GL_UNSIGNED_BYTE, thumb->thumb->tex);
       }
 
@@ -784,14 +784,14 @@ void drawBox(int x, int y, int w, int h, int *color, int eye) {
    int i = 0, x1 = 0, x2 = 0, y1 = 0, y2 = 0;
    GLubyte *img = NULL;
 
-   img = (GLubyte *)malloc(w*RGBA*sizeof(GLubyte));
+   img = (GLubyte *)malloc(w*RGB*sizeof(GLubyte));
    if (img == NULL) die("drawBox: malloc failure\n");
 
    for (i = 0; i < w; i++) {
-      *(img + (RGBA*i)) = (GLubyte) color[0];
-      *(img + (RGBA*i + 1)) = (GLubyte) color[1];
-      *(img + (RGBA*i + 2)) = (GLubyte) color[2];
-      *(img + (RGBA*i + 3)) = (GLubyte) 0;
+      *(img + (RGB*i)) = (GLubyte) color[0];
+      *(img + (RGB*i + 1)) = (GLubyte) color[1];
+      *(img + (RGB*i + 2)) = (GLubyte) color[2];
+      *(img + (RGB*i + 3)) = (GLubyte) 0;
    }
 
    if (clone_mode) {
@@ -830,7 +830,7 @@ debug("drawBox: x1=%d, x2=%d, y1=%d, y2=%d\n", x1, x2, y1, y2);
    /* draw top of box */
    if ((y1 > 0) && (y1 < screen_y-1)) {
       glRasterPos2i(x1, y1);
-      glDrawPixels(x2-x1+1, 1, GL_RGBA, GL_UNSIGNED_BYTE, img);
+      glDrawPixels(x2-x1+1, 1, GL_RGB, GL_UNSIGNED_BYTE, img);
    }
 
    /* draw left side of box */
@@ -838,7 +838,7 @@ debug("drawBox: x1=%d, x2=%d, y1=%d, y2=%d\n", x1, x2, y1, y2);
        ((eye == RIGHT) && ((x1 > screen_x) && (x1 < screen_x*2-1)))) {
       for (i = y1+1; i < y2; i++) {
          glRasterPos2i(x1, i);
-         glDrawPixels(1, 1, GL_RGBA, GL_UNSIGNED_BYTE, img);
+         glDrawPixels(1, 1, GL_RGB, GL_UNSIGNED_BYTE, img);
       }
    }
    /* draw right side of box */
@@ -846,14 +846,14 @@ debug("drawBox: x1=%d, x2=%d, y1=%d, y2=%d\n", x1, x2, y1, y2);
        ((eye == RIGHT) && ((x2 > screen_x) && (x2 < screen_x*2-1)))) {
       for (i = y1+1; i < y2; i++) {
          glRasterPos2i(x2, i);
-         glDrawPixels(1, 1, GL_RGBA, GL_UNSIGNED_BYTE, img);
+         glDrawPixels(1, 1, GL_RGB, GL_UNSIGNED_BYTE, img);
       }
    }
 
    /* draw bottom of box */
    if ((y2 > 0) && (y2 < screen_y-1)) {
       glRasterPos2i(x1, y2);
-      glDrawPixels(x2-x1+1, 1, GL_RGBA, GL_UNSIGNED_BYTE, img);
+      glDrawPixels(x2-x1+1, 1, GL_RGB, GL_UNSIGNED_BYTE, img);
    }
 
    free(img);
@@ -868,14 +868,14 @@ void drawFilledBox(int x, int y, int w, int h, int *color, int eye) {
    int i = 0, x1 = 0, x2 = 0, y1 = 0, y2 = 0;
    GLubyte *img = NULL;
 
-   img = (GLubyte *)malloc(w*RGBA*sizeof(GLubyte));
+   img = (GLubyte *)malloc(w*RGB*sizeof(GLubyte));
    if (img == NULL) die("drawBox: malloc failure\n");
 
    for (i = 0; i < w; i++) {
-      *(img + (RGBA*i)) = (GLubyte) color[0];
-      *(img + (RGBA*i + 1)) = (GLubyte) color[1];
-      *(img + (RGBA*i + 2)) = (GLubyte) color[2];
-      *(img + (RGBA*i + 3)) = (GLubyte) 0;
+      *(img + (RGB*i)) = (GLubyte) color[0];
+      *(img + (RGB*i + 1)) = (GLubyte) color[1];
+      *(img + (RGB*i + 2)) = (GLubyte) color[2];
+      *(img + (RGB*i + 3)) = (GLubyte) 0;
    }
 
    if (clone_mode) {
@@ -914,7 +914,7 @@ debug("drawFilledBox: x1=%d, x2=%d, y1=%d, y2=%d\n", x1, x2, y1, y2);
    /* draw filled box */
    for (i = y1; i < y2+1; i++) {
       glRasterPos2i(x1, i);
-      glDrawPixels(x2-x1+1, 1, GL_RGBA, GL_UNSIGNED_BYTE, img);
+      glDrawPixels(x2-x1+1, 1, GL_RGB, GL_UNSIGNED_BYTE, img);
    }
 }
 

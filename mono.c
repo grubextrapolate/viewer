@@ -43,12 +43,12 @@ void displayFuncViewMono(void) {
 
          w = left->x2 - left->x1;
          h = left->y2 - left->y1;
-         r = left->width*RGBA;
-         off = RGBA*(left->y1*left->width+left->x1);
+         r = left->width*RGB;
+         off = RGB*(left->y1*left->width+left->x1);
 
          for (i = 0; i < h; i++) {
             glRasterPos2i(rx, ry + i);
-            glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+            glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                          left->tex+off);
             off += r;
          }
@@ -79,12 +79,12 @@ void displayFuncViewMono(void) {
 
          w = zleft->x2 - zleft->x1;
          h = zleft->y2 - zleft->y1;
-         r = zleft->width*RGBA;
-         off = RGBA*(zleft->y1*zleft->width+zleft->x1);
+         r = zleft->width*RGB;
+         off = RGB*(zleft->y1*zleft->width+zleft->x1);
 
          for (i = 0; i < h; i++) {
             glRasterPos2i(rx, ry + i);
-            glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+            glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                          zleft->tex+off);
             off += r;
          }

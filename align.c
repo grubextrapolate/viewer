@@ -40,19 +40,19 @@ void displayFuncAlign(void) {
 
       w = left->x2 - left->x1;
       h = left->y2 - left->y1;
-      r = left->width*RGBA;
-      off = RGBA*(left->y1*left->width+left->x1);
+      r = left->width*RGB;
+      off = RGB*(left->y1*left->width+left->x1);
 
       for (i = 0; i < h; i++) {
          if (clone_mode) {
             glDrawBuffer(GL_BACK_LEFT);
             glRasterPos2i(rx, ry + i);
-            glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+            glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                          left->tex+off);
          } else {
             glDrawBuffer(GL_BACK);
             glRasterPos2i(rx, ry + i);
-            glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+            glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                          left->tex+off);
          }
          off += r;
@@ -68,19 +68,19 @@ void displayFuncAlign(void) {
 
       w = right->x2 - right->x1;
       h = right->y2 - right->y1;
-      r = right->width*RGBA;
-      off = RGBA*(right->y1*right->width+right->x1);
+      r = right->width*RGB;
+      off = RGB*(right->y1*right->width+right->x1);
 
       for (i = 0; i < h; i++) {
          if (clone_mode) {
             glDrawBuffer(GL_BACK_RIGHT);
             glRasterPos2i(rx, ry + i);
-            glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+            glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                          right->tex+off);
          } else {
             glDrawBuffer(GL_BACK);
             glRasterPos2i(rx+screen_x, ry + i);
-            glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+            glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                          right->tex+off);
          }
          off += r;
@@ -146,13 +146,13 @@ void keyboardFuncAlign(unsigned char key, int x, int y) {
          full->width = screen_x*2;
          full->height = screen_y;
          full->tex = (GLubyte *)malloc(full->width*full->height*
-                                       RGBA*sizeof(GLubyte));
+                                       RGB*sizeof(GLubyte));
          if (full->tex == NULL) die("keyboardFuncAlign: malloc failure\n");
 
          for (i = 0; i < full->height; i++) {
             for (j = 0; j < full->width; j++) {
-               for (k = 0; k < RGBA; k++) {
-                  *(full->tex + (RGBA*(i*
+               for (k = 0; k < RGB; k++) {
+                  *(full->tex + (RGB*(i*
                      full->width+j)+k)) = (GLubyte) 0;
                }
             }
@@ -164,16 +164,16 @@ void keyboardFuncAlign(unsigned char key, int x, int y) {
          /* calc crop */
          for (i = crop_y1; i < crop_y2; i++) {
             for (j = crop_x1; j < crop_x2; j++) {
-               for (k = 0; k < RGBA; k++) {
+               for (k = 0; k < RGB; k++) {
 
-                  *(full->tex +(RGBA*((i+start_y)*
+                  *(full->tex +(RGB*((i+start_y)*
                      full->width+j+start_x)+k)) =
-                     *(left->tex + (RGBA*((i-left->y)*
+                     *(left->tex + (RGB*((i-left->y)*
                      left->width+j-left->x)+k));
 
-                  *(full->tex +(RGBA*((i+start_y)*
+                  *(full->tex +(RGB*((i+start_y)*
                      full->width+j+start_x+screen_x)+k)) =
-                     *(right->tex + (RGBA*((i-right->y)*
+                     *(right->tex + (RGB*((i-right->y)*
                      right->width+j-right->x)+k));
 
                }

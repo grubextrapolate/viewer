@@ -55,14 +55,14 @@ void displayFuncView(void) {
 
          w = left->x2 - left->x1;
          h = left->y2 - left->y1;
-         r = left->width*RGBA;
-         off = RGBA*(left->y1*left->width+left->x1);
+         r = left->width*RGB;
+         off = RGB*(left->y1*left->width+left->x1);
 
          if (clone_mode) {
             for (i = 0; i < h; i++) {
                glDrawBuffer(GL_BACK_LEFT);
                glRasterPos2i(rx, ry + i);
-               glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+               glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                             left->tex+off);
                off += r;
             }
@@ -70,7 +70,7 @@ void displayFuncView(void) {
             for (i = 0; i < h; i++) {
                glDrawBuffer(GL_BACK);
                glRasterPos2i(rx, ry + i);
-               glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+               glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                             left->tex+off);
                off += r;
             }
@@ -86,19 +86,19 @@ void displayFuncView(void) {
 
          w = right->x2 - right->x1;
          h = right->y2 - right->y1;
-         r = right->width*RGBA;
-         off = RGBA*(right->y1*right->width+right->x1);
+         r = right->width*RGB;
+         off = RGB*(right->y1*right->width+right->x1);
 
          for (i = 0; i < h; i++) {
             if (clone_mode) {
                glDrawBuffer(GL_BACK_RIGHT);
                glRasterPos2i(rx, ry + i);
-               glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+               glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                             right->tex+off);
             } else {
                glDrawBuffer(GL_BACK);
                glRasterPos2i(rx+screen_x, ry + i);
-               glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+               glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                             right->tex+off);
             }
             off += r;
@@ -133,19 +133,19 @@ void displayFuncView(void) {
 
          w = zleft->x2 - zleft->x1;
          h = zleft->y2 - zleft->y1;
-         r = zleft->width*RGBA;
-         off = RGBA*(zleft->y1*zleft->width+zleft->x1);
+         r = zleft->width*RGB;
+         off = RGB*(zleft->y1*zleft->width+zleft->x1);
 
          for (i = 0; i < h; i++) {
             if (clone_mode) {
                glDrawBuffer(GL_BACK_LEFT);
                glRasterPos2i(rx, ry + i);
-               glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+               glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                             zleft->tex+off);
             } else {
                glDrawBuffer(GL_BACK);
                glRasterPos2i(rx, ry + i);
-               glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+               glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                             zleft->tex+off);
             }
             off += r;
@@ -160,19 +160,19 @@ void displayFuncView(void) {
 
          w = zright->x2 - zright->x1;
          h = zright->y2 - zright->y1;
-         r = zright->width*RGBA;
-         off = RGBA*(zright->y1*zright->width+zright->x1);
+         r = zright->width*RGB;
+         off = RGB*(zright->y1*zright->width+zright->x1);
 
          for (i = 0; i < h; i++) {
             if (clone_mode) {
                glDrawBuffer(GL_BACK_RIGHT);
                glRasterPos2i(rx, ry + i);
-               glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+               glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                             zright->tex+off);
             } else {
                glDrawBuffer(GL_BACK);
                glRasterPos2i(rx+screen_x, ry + i);
-               glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+               glDrawPixels(w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                             zright->tex+off);
             }
             off += r;
