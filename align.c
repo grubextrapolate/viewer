@@ -1,5 +1,7 @@
 #include "viewer.h"
 
+int moving = -1;
+
 /*
  * display function for ALIGN mode draws the two images (on a black
  * background if they are smaller than the screen size). uses double
@@ -285,7 +287,7 @@ void specialFuncAlign(int key, int x, int y) {
                left->y += 10;
                right->y += 10;
             } else {
-               right->y++;
+               left->y++;
                right->y++;
             }
          } else {
@@ -343,3 +345,58 @@ void resizeFuncAlign(int height, int width) {
    gluOrtho2D(0, screen_x*2, 0, screen_y);
 
 }
+
+void mouseFuncAlign(int button, int state, int x, int y) {
+
+   if ((button == GLUT_MIDDLE_BUTTON) && (state == GLUT_DOWN)) {
+      debug("mouseFuncAlign: mouse middle down at (%d,%d)\n", x, y);
+      mousex1 = x;
+      mousey1 = y;
+      moving = BOTH;
+   } else if ((button == GLUT_MIDDLE_BUTTON) && (state == GLUT_UP)) {
+      debug("mouseFuncAlign: mouse middle up at (%d,%d)\n", x, y);
+      moving = -1;
+   }
+
+   if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_DOWN)) {
+      debug("mouseFuncAlign: mouse left down at (%d,%d)\n", x, y);
+      mousex1 = x;
+      mousey1 = y;
+      if (x < screen_x) moving = LEFT;
+      else moving = RIGHT;
+   } else if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP)) {
+      debug("mouseFuncAlign: mouse left up at (%d,%d)\n", x, y);
+      moving = -1;
+   }
+}
+
+void motionFuncAlign(int x, int y) {
+
+   int dx, dy;
+
+   dx = x - mousex1;
+   dy = y - mousey1;
+   mousex1 = x;
+   mousey1 = y;
+   debug("motionFuncAlign: mouse moved to (%d,%d), dx=%d, dy=%d\n", x, y, dx, dy);
+
+   if (moving == LEFT) {
+      left->x += dx;
+      left->y -= dy;
+      calcWindow(left);
+   } else if (moving == RIGHT) {
+      right->x += dx;
+      right->y -= dy;
+      calcWindow(right);
+   } else if (moving == BOTH) {
+      left->x += dx;
+      left->y -= dy;
+      calcWindow(left);
+      right->x += dx;
+      right->y -= dy;
+      calcWindow(right);
+   }
+
+   glutPostRedisplay();
+}
+

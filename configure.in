@@ -35,7 +35,6 @@ LIBDIRS=
 LDFLAGS=
 INCDIRS=
 EXTRALIBS=
-JPEG_DIR=
 
 AC_SUBST(CC)
 AC_SUBST(CFLAGS)
@@ -44,7 +43,6 @@ AC_SUBST(EXTRALIBS)
 AC_SUBST(LDFLAGS)
 AC_SUBST(LIBDIRS)
 AC_SUBST(INCDIRS)
-AC_SUBST(JPEG_DIR)
 AC_SUBST(INSTALL)
 
 case "$OS_TYPE" in
@@ -52,7 +50,7 @@ case "$OS_TYPE" in
     LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
     LDFLAGS="-O2"
     LIBDIRS="-L/usr/X11R6/lib"
-    EXTRALIBS="-ljpeg -Xlinker -rpath /usr/X11R6/lib"
+    EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
     INCDIRS="-I/usr/X11R6/include"
     CFLAGS="-Wall -O2"
     if test "$OS_TYPE" = "FreeBSD" ; then
@@ -69,31 +67,28 @@ case "$OS_TYPE" in
   SunOS)
     LIBS="-lMesaglut -lMesaGLU  -lMesaGL -lXext -lXi -lXmu -lX11 -lsocket -lm"
     LIBDIRS="-L/soft/X11R6.3/lib"
-    EXTRALIBS="-R/soft/X11R6.3/lib -ljpeg"
+    EXTRALIBS="-R/soft/X11R6.3/lib"
     INCDIRS="-I/soft/X11R6.3/include"
     CFLAGS="-xO5 -Dinline="
     ;;
 
   IRIX)
     LDFLAGS="-Ofast=ip22_4k -lglut -lGLU -lGL -lXmu -lX11 -lm"
-    EXTRALIBS="-ljpeg"
     CFLAGS="-Ofast=ip22_4k -Dinline="
     ;;
 
   IRIX_gcc)
     LDFLAGS="-lglut -lGLU -lGL -lXmu -lX11 -lm"
-    EXTRALIBS="-ljpeg"
     CFLAGS="-O2 -Dinline="
     ;;
 
-  Darwin)
+  Darwin|DARWIN)
+    OS_TYPE="Darwin"
     LIBS="-lobjc -lm"
     LDFLAGS="-O3"
-    LIBDIRS="-L${JPEG_DIR}/lib"
-    EXTRALIBS="-framework GLUT -framework OpenGL -ljpeg"
-    INCDIRS="-I/System/Library/Frameworks/GLUT.framework/Headers -I/System/Library/Frameworks/OpenGL.framework/Headers -I${JPEG_DIR}/include"
+    EXTRALIBS="-framework GLUT -framework OpenGL"
+    INCDIRS="-I/System/Library/Frameworks/GLUT.framework/Headers -I/System/Library/Frameworks/OpenGL.framework/Headers"
     CFLAGS="-O3"
-    JPEG_DIR="/usr/local/jpeg"
     ;;
 
   *)

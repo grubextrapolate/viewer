@@ -1,3 +1,13 @@
+0.7.2:
+-fixed small bug with clipping and zoom
+-fixed small bug in align keyboard code
+-re-added mouse functionality for align code (left button moves image)
+-improved mouse functionality for align code (middle button moves both)
+
+0.7.1:
+-few minor bug fixes
+-fixed builds for Darwin
+
 0.7.0:
 -made alignment function secondary, viewer function primary and because
  of this expanded upon the viewer functionality and simplified some of

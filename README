@@ -79,6 +79,13 @@ DESCRIPTION
        avoid this. Future plans for viewer include the ability to
        use user-defined keyboard commands to avoid this  problem.
 
+       The  mouse can be used to drag images in all viewer modes.
+       In alignment mode left clicking and dragging will move the
+       particular  image (left or right), whereas middle clicking
+       and dragging will move both images.  In  viewer  and  mono
+       modes  clicking either the left or middle button and drag-
+       ging will move both images.
+
 OPTIONS
        The options are:
 
@@ -242,5 +249,5 @@ BUGS
        No known bugs at this time. Please send bug reports to the
        author.
 
-                           May 24 2002                  VIEWER(1)
+                           June 20 2002                 VIEWER(1)
 

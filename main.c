@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
 
    if (mode == MONOVIEW) {
       if (!force_geom) {
-#ifdef OS_DARWIN
+#ifdef OS_Darwin
          screen_x = glutGet(GLUT_SCREEN_WIDTH)*2;
 #else
          screen_x = glutGet(GLUT_SCREEN_WIDTH);
@@ -86,14 +86,14 @@ int main(int argc, char **argv) {
       calcWindow(left);
    } else {
       if (!force_geom) {
-#ifdef OS_DARWIN
+#ifdef OS_Darwin
          screen_x = glutGet(GLUT_SCREEN_WIDTH);
 #else
          screen_x = glutGet(GLUT_SCREEN_WIDTH)/2;
 #endif
          screen_y = glutGet(GLUT_SCREEN_HEIGHT);
       } else {
-#ifndef OS_DARWIN
+#ifndef OS_Darwin
          screen_x = screen_x/2;
 #endif
       }
@@ -137,6 +137,8 @@ int main(int argc, char **argv) {
       glutReshapeFunc(resizeFuncAlign);
       glutKeyboardFunc(keyboardFuncAlign);
       glutSpecialFunc(specialFuncAlign);
+      glutMouseFunc(mouseFuncAlign);
+      glutMotionFunc(motionFuncAlign);
       glClearColor(0.0, 0.0, 0.0, 0.0);
       glShadeModel(GL_FLAT);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -259,7 +261,8 @@ void processArgs(int argc, char **argv) {
          if (i+1 < argc) {
             i++;
             if (isjpeg(argv[i]))
-               left = read_JPEG_file(argv[i]);
+/*               left = read_JPEG_file(argv[i]);
+*/ die("cant read jepgs yet\n");
             else
                left = read_texture(argv[i]);
             mode = MONOVIEW;
@@ -297,12 +300,14 @@ void processArgs(int argc, char **argv) {
          if (i+2 < argc) {
             i++;
             if (isjpeg(argv[i]))
-               left = read_JPEG_file(argv[i]);
+/*               left = read_JPEG_file(argv[i]);
+*/ die("cant read jepgs yet\n");
             else
                left = read_texture(argv[i]);
             i++;
             if (isjpeg(argv[i]))
-               right = read_JPEG_file(argv[i]);
+/*               right = read_JPEG_file(argv[i]);
+*/ die("cant read jepgs yet\n");
             else
                right = read_texture(argv[i]);
          } else {
@@ -313,12 +318,14 @@ void processArgs(int argc, char **argv) {
          if (i+2 < argc) {
             i++;
             if (isjpeg(argv[i]))
-               left = read_JPEG_file(argv[i]);
+/*               left = read_JPEG_file(argv[i]);
+*/ die("cant read jepgs yet\n");
             else
                left = read_texture(argv[i]);
             i++;
             if (isjpeg(argv[i]))
-               right = read_JPEG_file(argv[i]);
+/*               right = read_JPEG_file(argv[i]);
+*/ die("cant read jepgs yet\n");
             else
                right = read_texture(argv[i]);
             mode = ALIGN;
@@ -810,12 +817,12 @@ TEXTURE *zoomImage(TEXTURE *orig, int zoomfac) {
 
          for (i = ret->y1; i < ret->y2; i++) {
             for (j = ret->x1; j < ret->x2; j++) {
-               off = RGBA*((orig->height-1-(i/a))*orig->width+(j/a));
+               off = RGBA*((i/a)*orig->width+(j/a));
                r = (int) *(orig->tex + off);
                g = (int) *(orig->tex + off + 1);
                b = (int) *(orig->tex + off + 2);
 
-               off = RGBA*((ret->height-1-(i-ret->y1))*ret->width+(j-ret->x1));
+               off = RGBA*((i-ret->y1)*ret->width+(j-ret->x1));
                *(ret->tex + off) = (GLubyte) r;
                *(ret->tex + off + 1) = (GLubyte) g;
                *(ret->tex + off + 2) = (GLubyte) b;
@@ -860,7 +867,7 @@ TEXTURE *zoomImage(TEXTURE *orig, int zoomfac) {
                if (y == 0) y = a;
                for (k = 0; k < x; k++) {
                   for (l = 0; l < y; l++) {
-                     off = RGBA*((orig->height-1-(i*a+k))*orig->width+(j*a+l));
+                     off = RGBA*((i*a+k)*orig->width+(j*a+l));
                      r += (int) *(orig->tex + off);
                      g += (int) *(orig->tex + off + 1);
                      b += (int) *(orig->tex + off + 2);
@@ -869,7 +876,7 @@ TEXTURE *zoomImage(TEXTURE *orig, int zoomfac) {
                r = r/(x*y);
                g = g/(x*y);
                b = b/(x*y);
-               off = RGBA*((ret->height-1-(i-ret->y1))*ret->width+(j-ret->x1));
+               off = RGBA*((i-ret->y1)*ret->width+(j-ret->x1));
                *(ret->tex + off) = (GLubyte) r;
                *(ret->tex + off + 1) = (GLubyte) g;
                *(ret->tex + off + 2) = (GLubyte) b;
@@ -945,7 +952,7 @@ TEXTURE *makeThumb(TEXTURE *orig) {
             if (y == 0) y = a;
             for (k = 0; k < x; k++) {
                for (l = 0; l < y; l++) {
-                  off = RGBA*((orig->height-1-(i*a+k))*orig->width+(j*a+l));
+                  off = RGBA*((i*a+k)*orig->width+(j*a+l));
                   r += (int) *(orig->tex + off);
                   g += (int) *(orig->tex + off + 1);
                   b += (int) *(orig->tex + off + 2);
@@ -954,7 +961,7 @@ TEXTURE *makeThumb(TEXTURE *orig) {
             r = r/(x*y);
             g = g/(x*y);
             b = b/(x*y);
-            off = RGBA*((ret->height-i-1)*ret->width+j);
+            off = RGBA*(i*ret->width+j);
             *(ret->tex + off) = (GLubyte) r;
             *(ret->tex + off + 1) = (GLubyte) g;
             *(ret->tex + off + 2) = (GLubyte) b;

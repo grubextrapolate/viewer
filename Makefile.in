@@ -1,10 +1,9 @@
-# Makefile - viewer-0.7.0
+# Makefile - viewer-0.7.2
 # Russ Burdick 2001-2002
 
 #DEBUG = -DDEBUG -g
 
 # ---- @OS_TYPE@/@ARCH_TYPE@ ----
-JPEG_DIR = @JPEG_DIR@
 CC = @CC@
 DEFINES = -DOS_@OS_TYPE@ -DARCH_@ARCH_TYPE@
 CFLAGS = @CFLAGS@ @INCDIRS@ ${DEFINES} ${DEBUG}
@@ -19,7 +18,7 @@ exec_prefix = @exec_prefix@
 bindir = @bindir@
 mandir = @mandir@/man1
 
-OBJ = viewer.o align.o main.o example.o mono.o
+OBJ = viewer.o align.o main.o mono.o
 
 all: viewer
 

@@ -24,10 +24,11 @@
 
 #define LEFT 0
 #define RIGHT 1
+#define BOTH 2
 
 #define MAJOR 0
 #define MINOR 7
-#define PATCH 0
+#define PATCH 2
 
 #define RGB 3
 #define RGBA 4
@@ -98,6 +99,8 @@ void keyboardFuncAlign(unsigned char, int, int);
 void specialFuncAlign(int, int, int);
 void menuFuncAlign(int); /* the menu function */
 void resizeFuncAlign(int, int); /* the resize function */
+void mouseFuncAlign(int, int, int, int);
+void motionFuncAlign(int, int);
 
 /* function prototypes for main */
 void processArgs(int, char **);
