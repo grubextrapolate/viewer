@@ -1,0 +1,23 @@
+# Windows Makefile for viewer
+# Russ Burdick <wburdick@cs.umn.edu> 2001-2004
+
+# uncomment the following to enable debugging output
+#DEBUG = /DDEBUG
+
+# ---- Windows ----
+CC = cl
+CFLAGS = /O2 /DOS_Windows $(DEBUG)
+
+OBJ = viewer.obj align.obj main.obj mono.obj list.obj shared.obj
+
+all: viewer
+
+.PHONY: clean
+clean:
+	del viewer core *.obj
+
+viewer: $(OBJ)
+	$(CC) $(OBJ) $(LDFLAGS) $(LIBS)
+
+.c.obj:
+	$(CC) /c $(CFLAGS) $< 
