@@ -245,6 +245,14 @@ void specialFuncAlign(int key, int x, int y) {
    debug("specialFuncAlign: key is %d\n", key);
 
    switch(key) {
+      case GLUT_KEY_PAGE_UP: /* prev pair */
+         getPrevPair(list);
+         glutPostRedisplay();
+         break;
+      case GLUT_KEY_PAGE_DOWN: /* next pair */
+         getNextPair(list);
+         glutPostRedisplay();
+         break;
       case GLUT_KEY_LEFT:
          if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) {
             if (glutGetModifiers() & GLUT_ACTIVE_CTRL)

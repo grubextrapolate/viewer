@@ -123,6 +123,8 @@ void keyboardFuncViewMono(unsigned char key, int x, int y) {
          break;
       case 'z': /* zoom in */
       case 'Z':
+      case 'k':
+      case 'K':
          szoom += 1;
          freeTexture(&(left->thumb));
          left->thumb = NULL;
@@ -130,6 +132,8 @@ void keyboardFuncViewMono(unsigned char key, int x, int y) {
          break;
       case 'x': /* zoom out */
       case 'X':
+      case 'f':
+      case 'F':
          szoom -= 1;
          freeTexture(&(left->thumb));
          left->thumb = NULL;
@@ -212,6 +216,24 @@ void keyboardFuncViewMono(unsigned char key, int x, int y) {
       case 'R':
          glutPositionWindow(0, 0);
          break;
+      case 'y': /* move up: wallview compat */
+      case 'Y':
+         left->y += 10;
+         break;
+      /* move down: wallview compat CONFLICTS SO DISABLED */
+/*      case 'n':
+      case 'N':
+         left->y -= 10;
+         break;*/
+      case 'g': /* move left: wallview compat */
+      case 'G':
+         left->x += 10;
+         break;
+      case 'j': /* move right: wallview compat */
+      case 'J':
+         left->x -= 10;
+         break;
+
       default:
          break;
    }
@@ -226,6 +248,14 @@ void specialFuncViewMono(int key, int x, int y) {
    debug("specialFuncViewMono: key is %d\n", key);
 
    switch(key) {
+      case GLUT_KEY_PAGE_UP: /* prev pair */
+         getPrevPair(list);
+         glutPostRedisplay();
+         break;
+      case GLUT_KEY_PAGE_DOWN: /* next pair */
+         getNextPair(list);
+         glutPostRedisplay();
+         break;
       case GLUT_KEY_LEFT:
          if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) {
             left->x++;

@@ -24,6 +24,7 @@
 -improved thumbnail rendering so that image doesnt 'blow up' and stays 
  confined to the set thumb_size x thumb_size area
 -added command line option to change thumbnail size
+-updated documentation and further WallView compatibility changes
 
 0.7.3:
 -fixed bug with cropping in aligner mode

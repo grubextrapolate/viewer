@@ -209,6 +209,8 @@ void keyboardFuncView(unsigned char key, int x, int y) {
 
       case 'z': /* zoom in */
       case 'Z':
+      case 'k':
+      case 'K':
          szoom += 1;
          freeTexture(&(left->thumb));
          left->thumb = NULL;
@@ -218,6 +220,8 @@ void keyboardFuncView(unsigned char key, int x, int y) {
          break;
       case 'x': /* zoom out */
       case 'X':
+      case 'f':
+      case 'F':
          szoom -= 1;
          freeTexture(&(left->thumb));
          left->thumb = NULL;
@@ -318,6 +322,64 @@ void keyboardFuncView(unsigned char key, int x, int y) {
 
       case '5': /* 1/16 size */
          szoom = -4;
+         glutPostRedisplay();
+         break;
+
+      case 'y': /* move up: wallview compat */
+      case 'Y':
+      case 25:
+         if (glutGetModifiers() & GLUT_ACTIVE_CTRL) {
+            right->y += 10;
+            calcWindow(right);
+         } else {
+            left->y += 10;
+            right->y += 10;
+            calcWindow(left);
+            calcWindow(right);
+         }
+         glutPostRedisplay();
+         break;
+      /* move down: wallview compat CONFLICTS SO DISABLED */
+/*      case 'n':
+      case 'N':*/
+      case 14:
+         if (glutGetModifiers() & GLUT_ACTIVE_CTRL) {
+            right->y -= 10;
+            calcWindow(right);
+         } else {
+            left->y -= 10;
+            right->y -= 10;
+            calcWindow(left);
+            calcWindow(right);
+         }
+         glutPostRedisplay();
+         break;
+      case 'g': /* move left: wallview compat */
+      case 'G':
+      case 7:
+         if (glutGetModifiers() & GLUT_ACTIVE_CTRL) {
+            right->x += 10;
+            calcWindow(right);
+         } else {
+            left->x += 10;
+            right->x += 10;
+            calcWindow(left);
+            calcWindow(right);
+         }
+         glutPostRedisplay();
+         break;
+      case 'j': /* move right: wallview compat */
+      case 'J':
+      case 10:
+         if (glutGetModifiers() & GLUT_ACTIVE_CTRL) {
+            right->x -= 10;
+            calcWindow(right);
+         } else {
+            left->x -= 10;
+            right->x -= 10;
+            calcWindow(left);
+            calcWindow(right);
+         }
          glutPostRedisplay();
          break;
 
@@ -456,14 +518,25 @@ void motionFuncView(int x, int y) {
    debug("motionFuncView: mouse moved to (%d,%d), dx=%d, dy=%d\n", x, y, dx, dy);
 
    if (leftDown || middleDown) {
-      left->x += dx;
-      right->x += dx;
-      left->y -= dy;
-      right->y -= dy;
 
-      calcWindow(left);
-      calcWindow(right);
+      if (glutGetModifiers() & GLUT_ACTIVE_CTRL) {
 
+         right->x += dx;
+         right->y -= dy;
+
+         calcWindow(right);
+
+      } else {
+
+         left->x += dx;
+         right->x += dx;
+         left->y -= dy;
+         right->y -= dy;
+
+         calcWindow(left);
+         calcWindow(right);
+
+      }
       glutPostRedisplay();
 
    } else if (rightDown) {

@@ -1,4 +1,4 @@
-.TH VIEWER 1 "December 15 2002"
+.TH VIEWER 1 "April 2 2004"
 .SH NAME
 viewer \- stereo pair viewer/aligner
 .SH SYNOPSIS
@@ -34,10 +34,14 @@ There are three modes in which to use
 -m
 option), as a stereo viewer (with the
 .B
--i
+-i,
+.B
+-v,
+.B
+-f,
 or
 .B
--v
+-p
 option), or as a stereo pair aligner (with the
 .B
 -a
@@ -112,7 +116,8 @@ The mouse can be used to drag images in all viewer modes. In alignment
 mode left clicking and dragging will move the particular image (left or 
 right), whereas middle clicking and dragging will move both images. In 
 viewer and mono modes clicking either the left or middle button and 
-dragging will move both images.
+dragging will move both images, and clicking the right button and 
+dragging will zoom in/out.
 
 .SH OPTIONS
 The options are:
@@ -145,6 +150,14 @@ value is leftout.ppm. This option is only useful in aligner mode.
 Specify the output file for the right half of a stereo pair. Default
 value is rightout.ppm. This option is only useful in aligner mode.
 .TP
+.BI \-p,\ --import \ [file(s)]
+Specifies files to import. viewer will attempt to find pairs based on
+the filenames given to it, ignoring files that it can't find a match
+for. It will look for filenames that are identical except with one
+having a "L" and the other having an "R", or with one having "left" and
+the other "right". Both are case insensitive, so "rIgHT" and "LEft" 
+would also work. Only works in standard viewer mode.
+.TP
 .BI \-g,\ --geom \ [WIDTH]x[HEIGHT]
 Forces viewer to use a specified window geometry. The default 
 behavior is to cover the entire desktop.
@@ -154,6 +167,11 @@ Specifies the offset of the right hand image relative to the left hand
 image. this option should only be used AFTER a filename has been 
 specified on teh command line (ie: viewer -i left.ppm right.ppm -x 
 -2+4).
+.TP
+.BI \-t,\ --thumbsize \ [size]
+Specifies the size that should be used for the thumbnail view. The 
+default is 100 pixels (so the thumbnail view of image and screen will be 
+at most 100x100 pixels).
 .TP
 .BI \-n,\ --nothumb
 Disables thumbnail view
@@ -176,7 +194,8 @@ Enables fullscreen mode. This is valid for all viewing modes, but if the
 window geometry is forced this option will be ignored.
 
 .SH viewer mode commands
-these are the commands available while in viewer mode:
+these are the commands available while in viewer mode. starting with 
+version 0.7.4 this includes most of the commands found in WallView.
 .TP
 .BI q,\ ESC
 quit
@@ -185,10 +204,10 @@ quit
 toggle 'fine alignment' mode on/off. this will cause the cursor keys to 
 temporarily act as in aligner mode.
 .TP
-.BI x
+.BI x,\ f
 zoom out
 .TP
-.BI z
+.BI z,\ k
 zoom in
 .TP
 .BI b
@@ -197,38 +216,71 @@ small zoom out
 .BI v
 small zoom in
 .TP
-.BI n
+.BI n,\ SPACE,\ PAGEUP
 next image
 .TP
-.BI p
+.BI p,\ BACKSPACE,\ PAGEDOWN
 previous image
 .TP
 .BI c
 center images
 .TP
-.BI LEFT
-move left over image by 10 pixels
+.BI h
+home image (center and default zoom)
+.TP
+.BI d
+double size
+.TP
+.BI 1
+actual size
+.TP
+.BI 2
+half size
+.TP
+.BI 3
+quarter size
+.TP
+.BI 4
+eighth size
+.TP
+.BI 5
+sixteenth size
+.TP
+.BI LEFT,\ g
+move images left 10 pixels
 .TP
 .BI SHIFT+LEFT
-move left over image by 1 pixel
+move images left 1 pixel
 .TP
-.BI RIGHT
-move right over image by 10 pixels
+.BI RIGHT,\ j
+move images right 10 pixels
 .TP
 .BI SHIFT+RIGHT
-move right over image by 1 pixel
+move images right 1 pixel
 .TP
-.BI UP
-move up over image by 10 pixels
+.BI UP,\ y
+move images up 10 pixels
 .TP
 .BI SHIFT+UP
-move up over image by 1 pixel
+move images up 1 pixel
 .TP
 .BI DOWN
-move down over image by 10 pixels
+move images down 10 pixels
 .TP
 .BI SHIFT+DOWN
-move down over image by 1 pixel
+move images down 1 pixel
+.TP
+.BI CTRL+g
+move right image left 1 pixel
+.TP
+.BI CTRL+j
+move right image right 1 pixel
+.TP
+.BI CTRL+y
+move right image up 1 pixel
+.TP
+.BI CTRL+n
+move right image down 1 pixel
 
 .SH mono viewer mode commands
 the commands for mono viewer mode are identical to standard viewer mode, 
@@ -240,10 +292,10 @@ these are the commands available in aligner mode:
 .BI q,\ ESC
 quit
 .TP
-.BI n
+.BI n,\ SPACE,\ PAGEDOWN
 next image
 .TP
-.BI p
+.BI p,\ BACKSPACE,\ PAGEUP
 previous image
 .TP
 .BI ENTER
@@ -322,6 +374,11 @@ items are separated by spaces and all four options must be present.
 comments may be inserted into the file for better readability by using a 
 # sign at the start of a line. blank lines will also be ignored.
 
+	viewer --nothumb -p ../images/*.ppm
+
+this will turn off the thumbnail view and attemp to import pairs from 
+"../images/*.ppm", ignoring images that do not form pairs.
+
 .SH ENVIRONMENT
 .TP
 No special environment variables.
@@ -330,8 +387,8 @@ This software is covered under the GNU Public License as outlined in the
 COPYING file included with this distribution.
 .SH AUTHORS
 Russ Burdick <wburdick@cs.umn.edu>, with contributions from Nathan Weeks 
-<weeks@usgs.gov>, Andrew Johnson <aej@evl.uic.edu>, and Derek R. Ploor
-<drploor@students.wisc.edu>.
+<weeks@usgs.gov>, Andrew Johnson <aej@evl.uic.edu>, Derek R. Ploor
+<drploor@students.wisc.edu>, and Brian Harring <bdharring@wisc.edu>.
 .SH BUGS
 No known bugs at this time. Please send bug reports to the author.
 .PP
