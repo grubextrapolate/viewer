@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 Summary: stereo pair viewer/aligner
 Name: viewer
-Version: 0.7.4
+Version: 0.8.0
 Release: 1
 Copyright: GPL
 Group: Applications/Multimedia

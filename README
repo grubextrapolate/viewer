@@ -195,7 +195,7 @@ OPTIONS
 
 viewer mode commands
        these  are  the  commands  available while in viewer mode.
-       starting with version 0.7.4 this includes most of the com­
+       starting with version 0.8.0 this includes most of the com­
        mands found in WallView.
 
        q, ESC quit

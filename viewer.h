@@ -13,7 +13,7 @@
 #include <ctype.h>
 
 #ifdef _WIN32
-   #define VERSION "0.7.4"
+   #define VERSION "0.8.0"
 #else
    #include <stdlib.h>
    #include <unistd.h>

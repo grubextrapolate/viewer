@@ -1,4 +1,4 @@
-0.7.4:
+0.8.0:
 -added support for hardware stereo modes (also known as clone stereo or 
  quad buffered stereo) thanks to code supplied by Derek R. Ploor
  <drploor@students.wisc.edu> of the University of Wisconsin eMedia 
@@ -28,6 +28,8 @@
  confined to the set thumb_size x thumb_size area
 -added command line option to change thumbnail size
 -updated documentation and further WallView compatibility changes
+-changed version number from 0.7.4 to 0.8.0. much more than just 
+ bugfixes in this release.
 
 0.7.3:
 -fixed bug with cropping in aligner mode
