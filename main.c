@@ -22,7 +22,7 @@ TEXTURE *full = NULL;
 char *fullOutfile = NULL;
 char *leftOutfile = NULL;
 char *rightOutfile = NULL;
-char *basename = NULL;
+char *basefilename = NULL;
 
 /* either in ALIGN mode or in VIEWER mode */
 int mode = VIEWER;
@@ -427,7 +427,7 @@ void processArgs(int argc, char **argv) {
          findPairs(count, flist);
          i += count;
       } else if (argc == 2) {
-         basename = argv[1];
+         basefilename = argv[1];
          strcpy(buf, argv[1]);
          strcat(buf, "-l.ppm");
          strcpy(buf2, argv[1]);

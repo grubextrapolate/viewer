@@ -94,7 +94,7 @@ extern TEXTURE *zoomRight;
 extern char *fullOutfile;
 extern char *leftOutfile;
 extern char *rightOutfile;
-extern char *basename;
+extern char *basefilename;
 extern int mode;
 extern int zoom;
 extern double szoom;

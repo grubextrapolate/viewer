@@ -180,17 +180,17 @@ void keyboardFuncAlign(unsigned char key, int x, int y) {
             }
          }
 
-         if (basename != NULL) {
-            fullOutfile = (char *)malloc(sizeof(char)*(strlen(basename)+10));
-            strcpy(fullOutfile, basename);
+         if (basefilename != NULL) {
+            fullOutfile = (char *)malloc(sizeof(char)*(strlen(basefilename)+10));
+            strcpy(fullOutfile, basefilename);
             strcat(fullOutfile, "-pair.ppm");
 
-            leftOutfile = (char *)malloc(sizeof(char)*(strlen(basename)+14));
-            strcpy(leftOutfile, basename);
+            leftOutfile = (char *)malloc(sizeof(char)*(strlen(basefilename)+14));
+            strcpy(leftOutfile, basefilename);
             strcat(leftOutfile, "-leftcrop.ppm");
 
-            rightOutfile = (char *)malloc(sizeof(char)*(strlen(basename)+15));
-            strcpy(rightOutfile, basename);
+            rightOutfile = (char *)malloc(sizeof(char)*(strlen(basefilename)+15));
+            strcpy(rightOutfile, basefilename);
             strcat(rightOutfile, "-rightcrop.ppm");
          }
 
