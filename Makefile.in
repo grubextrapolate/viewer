@@ -37,7 +37,7 @@ install: viewer viewer.1
 	$(INSTALL) --mode=0644 viewer.1 $(mandir)
 
 mac: viewer
-	/Developer/Tools/Rez -t APPL viewer mac.r
+	/Developer/Tools/Rez -t APPL -o viewer mac.r
 
 uninstall:
 	rm -f $(bindir)/viewer

@@ -50,7 +50,7 @@ int nothumb = FALSE;
 
 PAIRLIST *list = NULL;
 
-int clone = 0;
+int clone = FALSE;
 
 /*
  * the main function. this sets up the global variables, creates menus,
@@ -72,7 +72,11 @@ int main(int argc, char **argv) {
 
    glutInit(&argc, argv);
 
-   glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE);
+   if (clone) {
+      glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_STEREO);
+   } else {
+      glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE);
+   }
 
    if (mode == MONOVIEW) {
       if (!force_geom) {
@@ -374,9 +378,9 @@ void processArgs(int argc, char **argv) {
                  (strcmp(argv[i], "--stereo") == 0)) {
          /*
           * Verify that stereo actually is available.
-          */
          if (!stereoCheck())
            die("This system does not support stereo.\n");
+          */
 
          clone = TRUE;
       } else if (argc == 2) {
