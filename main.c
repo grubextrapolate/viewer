@@ -45,6 +45,9 @@ int middleDown = FALSE;
 /* display thumbnails */
 int nothumb = FALSE;
 
+/* display zoom factor */
+int nofac = FALSE;
+
 PAIRLIST *list = NULL;
 
 int clone_mode = FALSE;
@@ -229,6 +232,7 @@ void showUsage() {
    printf("       -f, --file filename [multi-file viewer mode]\n");
    printf("       -h, --help [display this help message and exit]\n");
    printf("       -n, --nothumb [disable thumbnail view]\n");
+   printf("       -z, --nofac [disable zoom%% view]\n");
    printf("       -s, --stereo [enable hardware supported stereo]\n");
    printf("       -u, --fullscreen [enable fullscreen mode]\n");
    printf("       -p, --import <file(s)> [import the file(s) in viewer mode]\n");
@@ -284,6 +288,9 @@ void processArgs(int argc, char **argv) {
       } else if ((strcmp(argv[i], "-n") == 0) ||
                  (strcmp(argv[i], "--nothumb") == 0)) {
          nothumb = TRUE;
+      } else if ((strcmp(argv[i], "-z") == 0) ||
+                 (strcmp(argv[i], "--nofac") == 0)) {
+         nofac = TRUE;
       } else if ((strcmp(argv[i], "-m") == 0) ||
                  (strcmp(argv[i], "--mono") == 0)) {
          if (i+1 < argc) {

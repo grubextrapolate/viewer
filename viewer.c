@@ -71,6 +71,7 @@ void displayFuncView(void) {
             }
          }
          showPos(left, LEFT, NULL);
+         showZoomfac(LEFT);
       }
       if ((right->width >= 0) && (right->height >= 0)) {
 
@@ -99,6 +100,7 @@ void displayFuncView(void) {
             off += r;
          }
          showPos(right, RIGHT, NULL);
+         showZoomfac(RIGHT);
       }
 
    } else {
@@ -146,6 +148,7 @@ void displayFuncView(void) {
             off += r;
          }
          showPos(zleft, LEFT, left);
+         showZoomfac(LEFT);
       }
       if ((zright->width >= 0) && (zright->height >= 0)) {
          if (zright->x < 0) rx = 0;
@@ -173,6 +176,7 @@ void displayFuncView(void) {
             off += r;
          }
          showPos(zright, RIGHT, right);
+         showZoomfac(RIGHT);
       }
       freeTexture(&zleft);
       freeTexture(&zright);

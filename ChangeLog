@@ -30,6 +30,8 @@
 -updated documentation and further WallView compatibility changes
 -changed version number from 0.7.4 to 0.8.0. much more than just 
  bugfixes in this release.
+-added zoom percentage display and command line option to turn it off. 
+ updated documentation to contain this info
 
 0.7.3:
 -fixed bug with cropping in aligner mode

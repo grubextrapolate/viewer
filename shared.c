@@ -775,6 +775,69 @@ void showPos(TEXTURE *tex, int eye, TEXTURE *ext_thumb) {
 }
 
 /*
+ * draws the zoom factor percentage in the upper right corner so that
+ * the user knows whether or not they've zoomed in/out of the image, and
+ * how much.
+ */
+void showZoomfac(int eye) {
+
+   int x = 0, y = 0;
+   double fac = 0;
+   int width = 0;
+   int i = 0;
+   int black[] = {0, 0, 0};
+   char str[25];
+   str[0] = '\0';
+
+   if (!nofac) {
+
+      if (eye == LEFT || clone_mode) {
+         x = screen_x - 5;
+      } else {
+         x = screen_x*2 - 5;
+      }
+      y = screen_y - 12;
+      fac = pow(2,szoom)*100;
+
+      debug("showZoomfac: szoom=%f, fac=%f\n", szoom, fac);
+
+      /* if > 1 we show only non-decimal digits, otherwise 3 places */
+      if (fac > 1) {
+         sprintf(str, "%.0f%%", fac);
+         debug("showZoomfac: str=\"%s\"\n", str);
+      } else {
+         sprintf(str, "%.3f%%", fac);
+         debug("showZoomfac: str=\"%s\"\n", str);
+      }
+
+      /* find the width of the string, then position accordingly */
+      for (i = 0; i < strlen(str); i++) {
+         width += glutBitmapWidth(GLUT_BITMAP_HELVETICA_12, str[i]);
+      }
+      x -= width;
+
+      if (clone_mode) {
+         if (eye == LEFT) {
+            glDrawBuffer(GL_BACK_LEFT);
+         } else { /* (eye == RIGHT) */
+            glDrawBuffer(GL_BACK_RIGHT);
+         }
+      } else {
+         glDrawBuffer(GL_BACK);
+      }
+
+      /* draw background box */
+      drawFilledBox(x-2, y-2, width+4, 14, black, eye);
+
+      /* draw zoomfac string, one character at a time */
+      glRasterPos2i(x, y);
+      for (i = 0; i < strlen(str); i++) {
+         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, str[i]);
+      }
+   }
+}
+
+/*
  * draws an unfilled box in the indicated color (int[3] with values from 
  * 0-255) at the specified location (x,y) of the specified size (w,h).
  */

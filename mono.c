@@ -53,6 +53,7 @@ void displayFuncViewMono(void) {
             off += r;
          }
          showPos(left, LEFT, NULL);
+         showZoomfac(LEFT);
       }
    } else {
 
@@ -89,6 +90,7 @@ void displayFuncViewMono(void) {
             off += r;
          }
          showPos(zleft, LEFT, left);
+         showZoomfac(LEFT);
       }
       freeTexture(&zleft);
 

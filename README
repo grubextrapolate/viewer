@@ -171,6 +171,9 @@ OPTIONS
        -n, --nothumb
               Disables thumbnail view
 
+       -z, --nofac
+              Disables zoom percentage view
+
        -f, --file [filename]
               Specifies a file which contains a  list  with  four
               entries  per line, the first representing the file­
