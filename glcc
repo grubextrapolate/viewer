@@ -1,0 +1,30 @@
+#!/bin/tcsh
+
+setenv SYSTEM `uname -s`
+
+if ($1 == "") then
+   echo "usage: glcc sourcefile [outfile]"
+else
+   if ($2 == "") then
+      if ($SYSTEM == SunOS) then
+         gcc $1 -I/soft/X11R6.3/include -L/soft/X11R6.3/lib -R/soft/X11R6.3/lib -lMesaglut -lMesaGLU  -lMesaGL -lXext -lXi -lXmu -lX11 -lsocket -lm -Wall
+      else if ($SYSTEM == Linux) then
+         gcc $1 -I/usr/X11R6/include -L/usr/X11R6/lib -Xlinker -rpath /usr/X11R6/lib -lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm -Wall
+      else if ($SYSTEM == IRIX64) then
+         gcc $1 -lglut -lGLU -lGL -lXmu -lX11 -lm -Wall
+      else
+         echo "dont know how to compile for your system"
+      endif
+   else
+      if ($SYSTEM == SunOS) then
+         gcc $1 -o $2 -I/soft/X11R6.3/include -L/soft/X11R6.3/lib -R/soft/X11R6.3/lib -lMesaglut -lMesaGLU  -lMesaGL -lXext -lXi -lXmu -lX11 -lsocket -lm -Wall
+      else if ($SYSTEM == Linux) then
+         gcc $1 -o $2 -I/usr/X11R6/include -L/usr/X11R6/lib -Xlinker -rpath /usr/X11R6/lib -lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm -Wall
+      else if ($SYSTEM == IRIX64) then
+         gcc $1 -o $2 -lglut -lGLU -lGL -lXmu -lX11 -lm -Wall
+      else
+         echo "dont know how to compile for your system"
+      endif
+   endif
+endif
+
