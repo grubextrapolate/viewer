@@ -56,17 +56,17 @@ DESCRIPTION
 
        There are three modes in which to use viewer : as  a  mono
        viewer  (with the -m option), as a stereo viewer (with the
-       -i or -v option), or as a stereo pair aligner (with the -a
-       option).  There  is  an additional special way that viewer
-       can be run: if no arguments are given and  only  an  image
-       'basename'  is  given the program will load basename-l.ppm
-       and basename-r.ppm and enter viewer mode. This can be very
-       convenient  for  viewing already aligned image pairs using
-       the default configuration. If the program is  not  run  in
-       with  a  basename  then  one  of  the -m , -v , -i , or -a
-       options must be used. The -o , -l ,  and  -r  options  are
-       only  useful when running in aligner mode. If viewer is run
-       using basename it enters aligner mode.
+       -i, -v, -f, or -p option), or as  a  stereo  pair  aligner
+       (with  the  -a option). There is an additional special way
+       that viewer can be run: if no arguments are given and only
+       an  image  'basename' is given the program will load base­
+       name-l.ppm and basename-r.ppm and enter viewer mode.  This
+       can  be  very convenient for viewing already aligned image
+       pairs using the default configuration. If the  program  is
+       not  run in with a basename then one of the -m , -v , -i ,
+       or -a options must be used. The -o , -l , and  -r  options
+       are only useful when running in aligner mode. If viewer is
+       run using basename it enters aligner mode.
 
        Additionally it is possible to pass the -g option to spec­
        ify  the  window  size. If this option is omitted then the
@@ -100,8 +100,9 @@ DESCRIPTION
        In alignment mode left clicking and dragging will move the
        particular  image (left or right), whereas middle clicking
        and dragging will move both images.  In  viewer  and  mono
-       modes  clicking either the left or middle button and drag-
-       ging will move both images.
+       modes  clicking either the left or middle button and drag­
+       ging will move both images, and clicking the right  button
+       and dragging will zoom in/out.
 
 OPTIONS
        The options are:
@@ -113,8 +114,8 @@ OPTIONS
               Display a pair of images in viewer mode
 
        -v, --view [fullimage.ppm]
-              Display a combined pair of images in  viewer  mode.
-              assumes  left  half  of image is left eye image and
+              Display  a  combined pair of images in viewer mode.
+              assumes left half of image is left  eye  image  and
               right half of image is right eye image.
 
        -m, --mono [monoimage.ppm]
@@ -124,31 +125,48 @@ OPTIONS
               Display a pair of images in aligner mode
 
        -o, --output [fulloutfile.ppm]
-              Specify the output file for a joined  stereo  pair.
-              Default  value  is fullout.ppm. This option is only
+              Specify  the  output file for a joined stereo pair.
+              Default value is fullout.ppm. This option  is  only
               useful in aligner mode.
 
        -l, --left [leftoutfile.ppm]
-              Specify the output file for  the  left  half  of  a
-              stereo  pair.  Default  value  is leftout.ppm. This
+              Specify  the  output  file  for  the left half of a
+              stereo pair. Default  value  is  leftout.ppm.  This
               option is only useful in aligner mode.
 
        -r, --right [rightoutfile.ppm]
-              Specify the output file for the  right  half  of  a
-              stereo  pair.  Default  value is rightout.ppm. This
+              Specify  the  output  file  for the right half of a
+              stereo pair. Default value  is  rightout.ppm.  This
               option is only useful in aligner mode.
 
+       -p, --import [file(s)]
+              Specifies  files  to import. viewer will attempt to
+              find pairs based on  the  filenames  given  to  it,
+              ignoring  files  that it can't find a match for. It
+              will look for filenames that are  identical  except
+              with  one having a "L" and the other having an "R",
+              or with one having "left" and  the  other  "right".
+              Both  are  case  insensitive, so "rIgHT" and "LEft"
+              would also work.  Only  works  in  standard  viewer
+              mode.
+
        -g, --geom [WIDTH]x[HEIGHT]
-              Forces viewer to use a specified  window  geometry.
-              The  default  behavior is to cover the entire desk­
+              Forces  viewer  to use a specified window geometry.
+              The default behavior is to cover the  entire  desk­
               top.
 
        -x, --off [x_offset][y_offset]
-              Specifies the offset of the right hand image  rela­
-              tive  to  the  left  hand image. this option should
+              Specifies  the offset of the right hand image rela­
+              tive to the left hand  image.  this  option  should
               only be used AFTER a filename has been specified on
-              teh  command line (ie: viewer -i left.ppm right.ppm
+              teh command line (ie: viewer -i left.ppm  right.ppm
               -x -2+4).
+
+       -t, --thumbsize [size]
+              Specifies  the  size  that  should  be used for the
+              thumbnail view. The default is 100 pixels  (so  the
+              thumbnail  view of image and screen will be at most
+              100x100 pixels).
 
        -n, --nothumb
               Disables thumbnail view
@@ -176,7 +194,9 @@ OPTIONS
               this option will be ignored.
 
 viewer mode commands
-       these are the commands available while in viewer mode:
+       these  are  the  commands  available while in viewer mode.
+       starting with version 0.7.4 this includes most of the com­
+       mands found in WallView.
 
        q, ESC quit
 
@@ -184,39 +204,65 @@ viewer mode commands
               cause the cursor keys  to  temporarily  act  as  in
               aligner mode.
 
-       x      zoom out
+       x, f   zoom out
 
-       z      zoom in
+       z, k   zoom in
 
        b      small zoom out
 
        v      small zoom in
 
-       n      next image
+       n, SPACE, PAGEUP
+              next image
 
-       p      previous image
+       p, BACKSPACE, PAGEDOWN
+              previous image
 
        c      center images
 
-       LEFT   move left over image by 10 pixels
+       h      home image (center and default zoom)
+
+       d      double size
+
+       1      actual size
+
+       2      half size
+
+       3      quarter size
+
+       4      eighth size
+
+       5      sixteenth size
+
+       LEFT, g
+              move images left 10 pixels
 
        SHIFT+LEFT
-              move left over image by 1 pixel
+              move images left 1 pixel
 
-       RIGHT  move right over image by 10 pixels
+       RIGHT, j
+              move images right 10 pixels
 
        SHIFT+RIGHT
-              move right over image by 1 pixel
+              move images right 1 pixel
 
-       UP     move up over image by 10 pixels
+       UP, y  move images up 10 pixels
 
        SHIFT+UP
-              move up over image by 1 pixel
+              move images up 1 pixel
 
-       DOWN   move down over image by 10 pixels
+       DOWN   move images down 10 pixels
 
        SHIFT+DOWN
-              move down over image by 1 pixel
+              move images down 1 pixel
+
+       CTRL+g move right image left 1 pixel
+
+       CTRL+j move right image right 1 pixel
+
+       CTRL+y move right image up 1 pixel
+
+       CTRL+n move right image down 1 pixel
 
 mono viewer mode commands
        the  commands  for mono viewer mode are identical to stan­
@@ -228,9 +274,11 @@ aligner mode commands
 
        q, ESC quit
 
-       n      next image
+       n, SPACE, PAGEDOWN
+              next image
 
-       p      previous image
+       p, BACKSPACE, PAGEUP
+              previous image
 
        ENTER  crop  images  to  screen and write left, right, and
               joined images
@@ -316,6 +364,12 @@ EXAMPLES
        using  a  #  sign at the start of a line. blank lines will
        also be ignored.
 
+            viewer --nothumb -p ../images/*.ppm
+
+       this will turn off the thumbnail view and attemp to import
+       pairs  from "../images/*.ppm", ignoring images that do not
+       form pairs.
+
 ENVIRONMENT
        No special environment variables.
 
@@ -327,12 +381,12 @@ LICENSE
 AUTHORS
        Russ  Burdick  <wburdick@cs.umn.edu>,  with  contributions
        from   Nathan   Weeks   <weeks@usgs.gov>,  Andrew  Johnson
-       <aej@evl.uic.edu>,  and  Derek  R.   Ploor   <drploor@stu­
-       dents.wisc.edu>.
+       <aej@evl.uic.edu>,   Derek    R.    Ploor    <drploor@stu­
+       dents.wisc.edu>, and Brian Harring <bdharring@wisc.edu>.
 
 BUGS
        No known bugs at this time. Please send bug reports to the
        author.
 
-                         December 15 2002               VIEWER(1)
+                           April 2 2004                 VIEWER(1)
 
