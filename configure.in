@@ -1,5 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(viewer.c)
+AC_INIT(viewer.c, 0.7.4)
+AM_INIT_AUTOMAKE
+
+AM_MAINTAINER_MODE
+
+AC_CANONICAL_HOST
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -19,15 +24,15 @@ dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
 AC_FUNC_VPRINTF
 
-AC_MSG_CHECKING(OS type)
-AC_SUBST(OS_TYPE)
-OS_TYPE=`uname -s | sed -e 's/ /_/g'`
-AC_MSG_RESULT($OS_TYPE)
-
-AC_MSG_CHECKING(machine architecture)
-AC_SUBST(ARCH_TYPE)
-ARCH_TYPE=`uname -m | sed -e 's/ /_/g'`
-AC_MSG_RESULT($ARCH_TYPE)
+dnl create a --enable-debug configure flag to turn on debugging output
+AC_ARG_ENABLE(debug,
+[  --enable-debug          Turn on debugging output],
+[case "${enableval}" in
+  yes) debug=true ;;
+  no)  debug=false ;;
+  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
+esac],[debug=false])
+AM_CONDITIONAL(DEBUG_ENABLE, test x$debug = xtrue)
 
 CFLAGS=
 LIBS=
@@ -36,32 +41,45 @@ LDFLAGS=
 INCDIRS=
 EXTRALIBS=
 
-AC_SUBST(CC)
-AC_SUBST(CFLAGS)
-AC_SUBST(LIBS)
-AC_SUBST(EXTRALIBS)
-AC_SUBST(LDFLAGS)
-AC_SUBST(LIBDIRS)
-AC_SUBST(INCDIRS)
-AC_SUBST(INSTALL)
-
-case "$OS_TYPE" in
-  Linux|FreeBSD|OpenBSD|NetBSD)
+case $host in
+  *-*-linux*)
     LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
     LDFLAGS="-O2"
     LIBDIRS="-L/usr/X11R6/lib"
     EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
     INCDIRS="-I/usr/X11R6/include"
     CFLAGS="-Wall -O2"
-    if test "$OS_TYPE" = "FreeBSD" ; then
-      OS_TYPE="BSD"
-    fi
-    if test "$OS_TYPE" = "OpenBSD" ; then
-      OS_TYPE="BSD"
-    fi
-    if test "$OS_TYPE" = "NetBSD" ; then
-      OS_TYPE="BSD"
-    fi
+    OS_TYPE="Linux"
+    ;;
+
+  FreeBSD)
+    LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
+    LDFLAGS="-O2"
+    LIBDIRS="-L/usr/X11R6/lib"
+    EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
+    INCDIRS="-I/usr/X11R6/include"
+    CFLAGS="-Wall -O2"
+    OS_TYPE="BSD"
+    ;;
+
+  OpenBSD)
+    LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
+    LDFLAGS="-O2"
+    LIBDIRS="-L/usr/X11R6/lib"
+    EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
+    INCDIRS="-I/usr/X11R6/include"
+    CFLAGS="-Wall -O2"
+    OS_TYPE="BSD"
+    ;;
+
+  NetBSD)
+    LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
+    LDFLAGS="-O2"
+    LIBDIRS="-L/usr/X11R6/lib"
+    EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
+    INCDIRS="-I/usr/X11R6/include"
+    CFLAGS="-Wall -O2"
+    OS_TYPE="BSD"
     ;;
 
   SunOS)
@@ -82,7 +100,7 @@ case "$OS_TYPE" in
     CFLAGS="-O2 -Dinline="
     ;;
 
-  Darwin|DARWIN)
+  *-*-darwin*)
     OS_TYPE="Darwin"
     LIBS="-lobjc -lm"
     LDFLAGS="-O3"
@@ -96,5 +114,15 @@ case "$OS_TYPE" in
     ;;
 
 esac
+
+AC_SUBST(OS_TYPE)
+AC_SUBST(CC)
+AC_SUBST(CFLAGS)
+AC_SUBST(LIBS)
+AC_SUBST(EXTRALIBS)
+AC_SUBST(LDFLAGS)
+AC_SUBST(LIBDIRS)
+AC_SUBST(INCDIRS)
+AC_SUBST(INSTALL)
 
 AC_OUTPUT(Makefile)

@@ -220,7 +220,7 @@ int main(int argc, char **argv) {
  */
 void showUsage() {
 
-   printf("stereo pair viewer/aligner v%d.%d.%d.\n", MAJOR, MINOR, PATCH);
+   printf("stereo pair viewer/aligner v%s.\n", VERSION);
    printf("by: Russ Burdick <wburdick@cs.umn.edu>\n\n");
    printf("usage:\n");
    printf("viewer [basename]\n");

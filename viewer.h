@@ -36,10 +36,6 @@
 #define RIGHT 1
 #define BOTH 2
 
-#define MAJOR 0
-#define MINOR 7
-#define PATCH 4
-
 #define RGB 3
 #define RGBA 4
 #define STRING_SIZE 132
