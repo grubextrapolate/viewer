@@ -217,7 +217,8 @@ int main(int argc, char **argv) {
 void showUsage() {
 
    printf("stereo pair viewer/aligner v%s.\n", VERSION);
-   printf("by: Russ Burdick <wburdick@cs.umn.edu>\n\n");
+   printf("by: Russ Burdick <wburdick@cs.umn.edu>\n");
+   printf("see manpage or AUTHORS for list of other contributors\n\n");
    printf("usage:\n");
    printf("viewer [basename]\n");
    printf("       will read basename-l.ppm and basename-r.ppm as left and right images\n");
