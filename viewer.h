@@ -9,11 +9,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <stdlib.h>
 #include <stdarg.h>
 #include <ctype.h>
 
-#ifndef _WIN32
+#ifdef _WIN32
+   #define VERSION "0.7.4"
+#else
+   #include <stdlib.h>
    #include <unistd.h>
 #endif
 
