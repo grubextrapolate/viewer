@@ -18,7 +18,7 @@ exec_prefix = @exec_prefix@
 bindir = @bindir@
 mandir = @mandir@/man1
 
-OBJ = viewer.o align.o main.o mono.o
+OBJ = viewer.o align.o main.o mono.o list.o
 
 all: viewer
 

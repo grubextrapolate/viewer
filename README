@@ -89,41 +89,62 @@ DESCRIPTION
 OPTIONS
        The options are:
 
-       -h     Display usage and version information and exit
+       -h, --help
+              Display usage and version information and exit
 
-       -i [leftimage.ppm rightimage.ppm]
+       -i, --input [leftimage.ppm rightimage.ppm]
               Display a pair of images in viewer mode
 
-       -v [fullimage.ppm]
-              Display  a  combined pair of images in viewer mode.
-              assumes left half of image is left  eye  image  and
+       -v, --view [fullimage.ppm]
+              Display a combined pair of images in  viewer  mode.
+              assumes  left  half  of image is left eye image and
               right half of image is right eye image.
 
-       -m [monoimage.ppm]
+       -m, --mono [monoimage.ppm]
               Display a mono image in viewer mode
 
-       -a [leftinfile.ppm rightinfile.ppm]
+       -a, --align [leftinfile.ppm rightinfile.ppm]
               Display a pair of images in aligner mode
 
-       -o [fulloutfile.ppm]
-              Specify  the  output file for a joined stereo pair.
-              Default value is fullout.ppm. This option  is  only
+       -o, --output [fulloutfile.ppm]
+              Specify the output file for a joined  stereo  pair.
+              Default  value  is fullout.ppm. This option is only
               useful in aligner mode.
 
-       -l [leftoutfile.ppm]
-              Specify  the  output  file  for  the left half of a
-              stereo pair. Default  value  is  leftout.ppm.  This
+       -l, --left [leftoutfile.ppm]
+              Specify the output file for  the  left  half  of  a
+              stereo  pair.  Default  value  is leftout.ppm. This
               option is only useful in aligner mode.
 
-       -r [rightoutfile.ppm]
-              Specify  the  output  file  for the right half of a
-              stereo pair. Default value  is  rightout.ppm.  This
+       -r, --right [rightoutfile.ppm]
+              Specify the output file for the  right  half  of  a
+              stereo  pair.  Default  value is rightout.ppm. This
               option is only useful in aligner mode.
 
-       -g [WIDTHxHEIGHT]
-              Forces  viewer  to use a specified window geometry.
-              The default behavior is to cover the  entire  desk­
+       -g, --geom [WIDTH]x[HEIGHT]
+              Forces viewer to use a specified  window  geometry.
+              The  default  behavior is to cover the entire desk­
               top.
+
+       -x, --off [x_offset][y_offset]
+              Specifies the offset of the right hand image  rela­
+              tive  to  the  left  hand image. this option should
+              only be used AFTER a filename has been specified on
+              teh  command line (ie: viewer -i left.ppm right.ppm
+              -x -2+4).
+
+       -n, --nothumb
+              Disables thumbnail view
+
+       -f, --file [filename]
+              Specifies a file which contains a  list  with  four
+              entries  per line, the first representing the file­
+              name of the left hand image, the second  represent­
+              ing the filename of the right hand image, the third
+              representing the x offset of the  right  image  and
+              the  fourth  representing the y offset of the right
+              image. The 'n' (or next) and 'p' (or prev) keys can
+              be used to view multiple pairs as a slideshow.
 
 viewer mode commands
        these are the commands available while in viewer mode:
@@ -137,6 +158,10 @@ viewer mode commands
        x      zoom out
 
        z      zoom in
+
+       n      next image
+
+       p      previous image
 
        c      center images
 
@@ -169,6 +194,10 @@ aligner mode commands
        these are the commands available in aligner mode:
 
        q, ESC quit
+
+       n      next image
+
+       p      previous image
 
        ENTER  crop  images  to  screen and write left, right, and
               joined images
@@ -234,6 +263,26 @@ EXAMPLES
        will  load  the  specified pair in viewer mode in a window
        covering the upper half of a 1024x768 desktop.
 
+            viewer -i  left1.ppm  right1.ppm  -off  +3-5  --input
+       left2.ppm right2.ppm -i left3.ppm right3.ppm -x -3+0
+
+       this  will  load a series of three images for a slideshow.
+       the first and third are not quite aligned so an offset  is
+       speciified,  but  the second pair is already aligned so no
+       offset information is  necessary.  note  that  the  offset
+       option applies to the PREVIOUS file input option.
+
+            viewer -f slideshow
+
+       this  will  load a series of images with the filenames and
+       offets being taken from the file. each line  of  the  file
+       should  contain exactly four items: left image name, right
+       image name, x offset, y offset. these items are  separated
+       by  spaces and all four options must be present.  comments
+       may be inserted into the file for  better  readability  by
+       using  a  #  sign at the start of a line. blank lines will
+       also be ignored.
+
 ENVIRONMENT
        No special environment variables.
 
@@ -242,12 +291,13 @@ LICENSE
        outlined  in the COPYING file included with this distribu­
        tion.
 
-AUTHOR
-       Russ Burdick <wburdick@cs.umn.edu>
+AUTHORS
+       Russ  Burdick  <wburdick@cs.umn.edu>,  with  contributions
+       from Nathan Weeks <weeks@usgs.gov>.
 
 BUGS
        No known bugs at this time. Please send bug reports to the
        author.
 
-                           June 20 2002                 VIEWER(1)
+                           July 21 2002                 VIEWER(1)
 

@@ -20,14 +20,6 @@ int first_time = TRUE; /* first time we've called display? */
 int screen_x = 0;
 int screen_y = 0;
 
-/*
- * right hand image can be 'offset' from top left corner of screen. was
- * used when second screen was offset in y direction, unused now. left
- * in for convenience and backwards compatibility.
- */
-int offset_x = 0;
-int offset_y = 0;
-
 /* left image, right image, and 'full' (combined left+right images) */
 TEXTURE *left = NULL;
 TEXTURE *right = NULL;
@@ -53,6 +45,11 @@ int mousey1 = 0;
 int fine_align = 0;
 int force_geom = 0;
 
+/* display thumbnails */
+int nothumb = FALSE;
+
+PAIRLIST *list = NULL;
+
 /*
  * the main function. this sets up the global variables, creates menus,
  * associates the various callback functions with their opengl event, and
@@ -63,7 +60,13 @@ int main(int argc, char **argv) {
    int mainmenu; /* menu id */
    int i, j, k;
 
+   initList(&list);
    processArgs(argc, argv);
+   if (list->cur != NULL) {
+      readPair(list->cur);
+   } else {
+      die("main: why is list->cur == NULL?\n");
+   }
 
    glutInit(&argc, argv);
 
@@ -104,8 +107,8 @@ int main(int argc, char **argv) {
       left->y = (screen_y - left->height)/2;
       calcWindow(left);
 
-      right->x = (screen_x - right->width)/2;
-      right->y = (screen_y - right->height)/2;
+      right->x = (screen_x - right->width)/2 + list->cur->x_offset;
+      right->y = (screen_y - right->height)/2 + list->cur->y_offset;
       calcWindow(right);
    }
 
@@ -114,7 +117,7 @@ int main(int argc, char **argv) {
    glutInitWindowSize(screen_x*2, screen_y);
    glutCreateWindow("stereo viewer");
 
-   if (mode == ALIGN) {
+   if (mode == ALIGN) { /* mode == ALIGN */
       debug("main: mode == ALIGN\n");
       full = (TEXTURE *)malloc(sizeof(TEXTURE));
       if (full == NULL) die("main: malloc failure\n");
@@ -127,7 +130,7 @@ int main(int argc, char **argv) {
       for (i = 0; i < full->height; i++) {
          for (j = 0; j < full->width; j++) {
             for (k = 0; k < RGBA; k++) {
-               *(full->tex + (RGBA*((full->height-1-i)*
+               *(full->tex + (RGBA*(i*
                   full->width+j)+k)) = (GLubyte) 0;
             }
          }
@@ -209,16 +212,19 @@ void showUsage() {
    printf("       and will write basename-leftcrop.ppm, basename-rightcrop.ppm,\n");
    printf("       and basename-pair.ppm. Using basename puts you in aligner mode.\n");
    printf("viewer [options]\n");
-   printf("       -i leftinfile.ppm rightinfile.ppm [viewer mode]\n");
-   printf("       -v fullinfile.ppm [viewer mode] \n");
-   printf("       -m monofile.ppm [mono mode]\n");
-   printf("       -a leftinfile.ppm rightinfile.ppm [aligner mode]\n");
-   printf("       -o fulloutfile.ppm [default = fullout.ppm]\n");
-   printf("       -l leftoutfile.ppm [default = leftout.ppm]\n");
-   printf("       -r rightoutfile.ppm [default = rightout.ppm]\n");
-   printf("       -g WxH [forces a specific window geometry]\n");
-   printf("       -h [display this help message and exit]\n");
-   printf("\nmust contain either the -i, -v, -a, or -m options or only basename.\n");
+   printf("       -i, --input leftinfile.ppm rightinfile.ppm [viewer mode]\n");
+   printf("       -v, --view fullinfile.ppm [viewer mode] \n");
+   printf("       -m, --mono monofile.ppm [mono mode]\n");
+   printf("       -a, --align leftinfile.ppm rightinfile.ppm [aligner mode]\n");
+   printf("       -o, --output fulloutfile.ppm [default = fullout.ppm]\n");
+   printf("       -l, --left leftoutfile.ppm [default = leftout.ppm]\n");
+   printf("       -r, --right rightoutfile.ppm [default = rightout.ppm]\n");
+   printf("       -g, --geom WxH [forces a specific window geometry]\n");
+   printf("       -x, --off XY [specifies offset of right image relative to left\n");
+   printf("       -f, --file filename [multi-file viewer mode]\n");
+   printf("       -h, --help [display this help message and exit]\n");
+   printf("       -n, --nothumb [disable thumbnail view]\n");
+   printf("\nmust contain either the -i, -v, -a, -m, or -f options or only basename.\n");
    printf("if the -o, -l, or -r options are omitted default will be used\n");
    printf("\nsee manpage viewer(1) for further information\n\n");
 }
@@ -230,6 +236,9 @@ void processArgs(int argc, char **argv) {
 
    int i = 1;
    char buf[2048];
+   char buf2[2048];
+   PAIR *ptr = NULL;
+   int xoff = 0, yoff = 0;
 
    if (argc == 1) { /* display usage */
       showUsage();
@@ -238,7 +247,8 @@ void processArgs(int argc, char **argv) {
 
    while (i < argc) {
 
-      if (strcmp(argv[i], "-o") == 0) {
+      if ((strcmp(argv[i], "-o") == 0) ||
+          (strcmp(argv[i], "--output") == 0)) {
          if (i+1 < argc) {
             i++;
             fullOutfile = argv[i];
@@ -246,31 +256,36 @@ void processArgs(int argc, char **argv) {
             showUsage();
             exit(-1);
          }
-      } else if (strcmp(argv[i], "-v") == 0) {
+      } else if ((strcmp(argv[i], "-v") == 0) ||
+                 (strcmp(argv[i], "--view") == 0)) {
          if (i+1 < argc) {
             i++;
-            readAndSplit(argv[i]);
+            ptr = newPair(argv[i], argv[i]);
+            addPair(ptr, &list);
          } else {
             showUsage();
             exit(-1);
          }
-      } else if (strcmp(argv[i], "-h") == 0) {
+      } else if ((strcmp(argv[i], "-h") == 0) ||
+                 (strcmp(argv[i], "--help") == 0)) {
          showUsage();
          exit(-1);
-      } else if (strcmp(argv[i], "-m") == 0) {
+      } else if ((strcmp(argv[i], "-n") == 0) ||
+                 (strcmp(argv[i], "--nothumb") == 0)) {
+         nothumb = TRUE;
+      } else if ((strcmp(argv[i], "-m") == 0) ||
+                 (strcmp(argv[i], "--mono") == 0)) {
          if (i+1 < argc) {
             i++;
-            if (isjpeg(argv[i]))
-/*               left = read_JPEG_file(argv[i]);
-*/ die("cant read jepgs yet\n");
-            else
-               left = read_texture(argv[i]);
             mode = MONOVIEW;
+            ptr = newPair(argv[i], NULL);
+            addPair(ptr, &list);
          } else {
             showUsage();
             exit(-1);
          }
-      } else if (strcmp(argv[i], "-g") == 0) {
+      } else if ((strcmp(argv[i], "-g") == 0) ||
+                 (strcmp(argv[i], "--geom") == 0)) {
          if (i+1 < argc) {
             i++;
             force_geom = 1;
@@ -280,7 +295,22 @@ void processArgs(int argc, char **argv) {
             showUsage();
             exit(-1);
          }
-      } else if (strcmp(argv[i], "-l") == 0) {
+      } else if ((strcmp(argv[i], "-x") == 0) ||
+                 (strcmp(argv[i], "--off") == 0)) {
+         if (i+1 < argc) {
+            i++;
+            sscanf(argv[i], "%d%d", &xoff, &yoff);
+            debug("processArgs: offset set to %+d%+d\n", xoff, yoff);
+            if ((list != NULL) && (list->tail != NULL)) {
+               list->tail->x_offset = xoff;
+               list->tail->y_offset = yoff;
+            }
+         } else {
+            showUsage();
+            exit(-1);
+         }
+      } else if ((strcmp(argv[i], "-l") == 0) ||
+                 (strcmp(argv[i], "--left") == 0)) {
          if (i+1 < argc) {
             i++;
             leftOutfile = argv[i];
@@ -288,7 +318,8 @@ void processArgs(int argc, char **argv) {
             showUsage();
             exit(-1);
          }
-      } else if (strcmp(argv[i], "-r") == 0) {
+      } else if ((strcmp(argv[i], "-r") == 0) ||
+                 (strcmp(argv[i], "--right") == 0)) {
          if (i+1 < argc) {
             i++;
             rightOutfile = argv[i];
@@ -296,39 +327,34 @@ void processArgs(int argc, char **argv) {
             showUsage();
             exit(-1);
          }
-      } else if (strcmp(argv[i], "-i") == 0) {
-         if (i+2 < argc) {
+      } else if ((strcmp(argv[i], "-f") == 0) ||
+                 (strcmp(argv[i], "--file") == 0)) {
+         if (i+1 < argc) {
             i++;
-            if (isjpeg(argv[i]))
-/*               left = read_JPEG_file(argv[i]);
-*/ die("cant read jepgs yet\n");
-            else
-               left = read_texture(argv[i]);
-            i++;
-            if (isjpeg(argv[i]))
-/*               right = read_JPEG_file(argv[i]);
-*/ die("cant read jepgs yet\n");
-            else
-               right = read_texture(argv[i]);
+            readFileList(argv[i], &list);
          } else {
             showUsage();
             exit(-1);
          }
-      } else if (strcmp(argv[i], "-a") == 0) {
+      } else if ((strcmp(argv[i], "-i") == 0) ||
+                 (strcmp(argv[i], "--input") == 0)) {
          if (i+2 < argc) {
             i++;
-            if (isjpeg(argv[i]))
-/*               left = read_JPEG_file(argv[i]);
-*/ die("cant read jepgs yet\n");
-            else
-               left = read_texture(argv[i]);
             i++;
-            if (isjpeg(argv[i]))
-/*               right = read_JPEG_file(argv[i]);
-*/ die("cant read jepgs yet\n");
-            else
-               right = read_texture(argv[i]);
+            ptr = newPair(argv[i-1], argv[i]);
+            addPair(ptr, &list);
+         } else {
+            showUsage();
+            exit(-1);
+         }
+      } else if ((strcmp(argv[i], "-a") == 0) ||
+                 (strcmp(argv[i], "--align") == 0)) {
+         if (i+2 < argc) {
+            i++;
+            i++;
             mode = ALIGN;
+            ptr = newPair(argv[i-1], argv[i]);
+            addPair(ptr, &list);
          } else {
             showUsage();
             exit(-1);
@@ -337,17 +363,142 @@ void processArgs(int argc, char **argv) {
          basename = argv[1];
          strcpy(buf, argv[1]);
          strcat(buf, "-l.ppm");
-         left = read_texture(buf);
-         strcpy(buf, argv[1]);
-         strcat(buf, "-r.ppm");
-         right = read_texture(buf);
+         strcpy(buf2, argv[1]);
+         strcat(buf2, "-r.ppm");
          mode = ALIGN;
+         ptr = newPair(buf, buf2);
+         addPair(ptr, &list);
       } else {
          showUsage();
       }
       i++;
    }
 
+}
+
+void readFileList(char *filename, PAIRLIST **list) {
+
+   PAIR *itm = NULL;
+   FILE *infile;
+   char ptr[STRING_SIZE]; /* input buffer */
+   char lfile[STRING_SIZE], rfile[STRING_SIZE];
+   int xoff, yoff;
+
+   if (!(infile = fopen(filename, "r"))) {
+      debug("readFileList: cant open list file \"%s\"\n", filename);
+   } else {
+
+      while (!feof(infile)) {
+         *ptr = '\0';
+         fgets(ptr, sizeof(char)*STRING_SIZE, infile);
+         if ((*ptr != '\0') && (*ptr != '#') && (*ptr != '\n')) {
+
+            sscanf(ptr, "%s %s %d %d", lfile, rfile, &xoff, &yoff);
+            debug("readFileList: \"%s\" \"%s\" %d %d\n", lfile, rfile, 
+                  xoff, yoff);
+            itm = newPair(lfile, rfile);
+            itm->x_offset = xoff;
+            itm->y_offset = yoff;
+            addPair(itm, list);
+         } else {
+            debug("readFileList: ignoring blank or comment line \n");
+         }
+      }
+   }
+}
+
+void readPair(PAIR *pair) {
+
+   if (pair != NULL) {
+
+      if (pair->left_file == pair->right_file) { /* -v */
+         debug("readPair: reading joined image from \"%s\"\n", 
+               pair->left_file);
+         readAndSplit(pair->left_file);
+      } else if (pair->right_file == NULL) { /* -m */
+         debug("readPair: reading mono image from \"%s\"\n", 
+               pair->left_file);
+         if (isjpeg(pair->left_file)) {
+/*            left = read_JPEG_file(pair->left_file);
+*/ die("cant read jepgs yet\n");
+         } else {
+            left = read_texture(pair->left_file);
+         }
+      } else { /* -i, -a, or basename */
+         debug("readPair: reading pair\n");
+         if (isjpeg(pair->left_file)) {
+/*            left = read_JPEG_file(pair->left_file);
+*/ die("cant read jepgs yet\n");
+         } else {
+            left = read_texture(pair->left_file);
+         }   
+         if (isjpeg(pair->right_file)) {
+/*            right = read_JPEG_file(pair->right_file);
+*/ die("cant read jepgs yet\n");
+         } else {
+            right = read_texture(pair->right_file);
+         }
+      }
+   } else {
+      die("readPair: cant read null pair\n");
+   }
+}
+
+void getNextPair(PAIRLIST *list) {
+
+   if ((list != NULL) && (list->cur != NULL)) {
+      if (list->cur->next != NULL) {
+         list->cur = list->cur->next;
+
+         if (left != NULL) freeTexture(&left);
+         if (right != NULL) freeTexture(&right);
+         readPair(list->cur);
+
+         left->x = (screen_x - left->width)/2;
+         left->y = (screen_y - left->height)/2;
+         calcWindow(left);
+
+         if (list->cur->right_file != NULL) {
+            right->x = (screen_x - right->width)/2 + list->cur->x_offset;
+            right->y = (screen_y - right->height)/2 + list->cur->y_offset;
+            calcWindow(right);
+         }
+      }
+   }
+}
+
+void getPrevPair(PAIRLIST *list) {
+
+   if ((list != NULL) && (list->cur != NULL)) {
+      if (list->cur->prev != NULL) {
+         list->cur = list->cur->prev;
+
+         if (left != NULL) freeTexture(&left);
+         if (right != NULL) freeTexture(&right);
+         readPair(list->cur);
+
+         left->x = (screen_x - left->width)/2;
+         left->y = (screen_y - left->height)/2;
+         calcWindow(left);
+
+         if (list->cur->right_file != NULL) {
+            right->x = (screen_x - right->width)/2 + list->cur->x_offset;
+            right->y = (screen_y - right->height)/2 + list->cur->y_offset;
+            calcWindow(right);
+         }
+      }
+   }
+}
+
+void freeTexture(TEXTURE **tex) {
+
+   if (*tex != NULL) {
+      if ((*tex)->thumb != NULL) freeTexture(&((*tex)->thumb));
+
+      if ((*tex)->tex != NULL) free((*tex)->tex);
+      free(*tex);
+      *tex = NULL;
+   }
 }
 
 /*
@@ -905,6 +1056,7 @@ TEXTURE *makeThumb(TEXTURE *orig) {
          die("makeThumb: error allocating texture image");
       }
 
+      ret->thumb = NULL;
       ret->x = 0;
       ret->y = 0;
       ret->x1 = 0;
@@ -983,7 +1135,7 @@ void showPos(TEXTURE *tex, int dx, int dy, int eye) {
    int white[] = {255, 255, 255};
    int black[] = {0, 0, 0};
 
-   if (tex != NULL) {
+   if ((!nothumb) && (tex != NULL)) {
       if (tex->thumb == NULL) tex->thumb = makeThumb(tex);
       if (eye == LEFT) {
          x = screen_x - thumb_size - 20;

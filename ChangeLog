@@ -1,3 +1,18 @@
+0.7.3:
+-fixed bug with cropping in aligner mode
+-added thumbnail view to aligner mode
+-added '-n' command line option to disable thumbnails
+-added '--off [x offset][y offset]' command line argument to specify 
+ offset of right image relative to left.
+-added longer versions of each command line option for better 
+ readability in scripts. see 'viewer -h' or the man page for more info.
+-added multi-file inputs either via command line (by chaining multiple 
+ -i, -m, -v, or -a options (with offsets where applicable)) or via the 
+ new -f option to read filenames and offsets from a file. this feature 
+ is based upon the work of Nathan Weeks <weeks@usgs.gov> at the EROS
+ Data Center. Thanks for the input!
+-updated the manpage and README to reflect new options
+
 0.7.2:
 -fixed small bug with clipping and zoom
 -fixed small bug in align keyboard code

@@ -48,7 +48,7 @@ void displayFuncAlign(void) {
                       left->tex+off);
          off += r;
       }
-
+      showPos(left, 0, 0, LEFT);
    }
    if ((right->width >= 0) && (right->height >= 0)) {
 
@@ -68,6 +68,7 @@ void displayFuncAlign(void) {
                       right->tex+off);
          off += r;
       }
+      showPos(right, 0, 0, RIGHT);
    }
    glutSwapBuffers();
 }
@@ -85,6 +86,18 @@ void keyboardFuncAlign(unsigned char key, int x, int y) {
    debug("keyboardFuncAlign: key is (ascii) %d\n", key);
 
    switch(key) {
+      case 'n': /* next pair */
+      case 'N':
+      case ' ':
+         getNextPair(list);
+         glutPostRedisplay();
+         break;
+      case 'p': /* prev pair */
+      case 'P':
+      case 8: /* backspace */
+         getPrevPair(list);
+         glutPostRedisplay();
+         break;
       case 13:
          debug("keyboardFuncAlign: return key pressed.\n");
 
@@ -92,7 +105,7 @@ void keyboardFuncAlign(unsigned char key, int x, int y) {
                left->width, left->height, left->x, left->y);
          debug("keyboardFuncAlign: right image is %dx%d at %dx%d, offset by %dx%d\n",
                right->width, right->height, right->x, right->y, screen_x +
-               offset_x, offset_y);
+               list->cur->x_offset, list->cur->y_offset);
 
          crop_x1 = max(left->x, right->x);
          crop_x2 = min(left->x + left->width, right->x + right->width);
@@ -121,7 +134,7 @@ void keyboardFuncAlign(unsigned char key, int x, int y) {
          for (i = 0; i < full->height; i++) {
             for (j = 0; j < full->width; j++) {
                for (k = 0; k < RGBA; k++) {
-                  *(full->tex + (RGBA*((full->height-1-i)*
+                  *(full->tex + (RGBA*(i*
                      full->width+j)+k)) = (GLubyte) 0;
                }
             }
@@ -135,14 +148,14 @@ void keyboardFuncAlign(unsigned char key, int x, int y) {
             for (j = crop_x1; j < crop_x2; j++) {
                for (k = 0; k < RGBA; k++) {
 
-                  *(full->tex +(RGBA*((full->height-1-i-start_y)*
+                  *(full->tex +(RGBA*((i+start_y)*
                      full->width+j+start_x)+k)) =
-                     *(left->tex + (RGBA*((left->height-1-i+left->y)*
+                     *(left->tex + (RGBA*((i-left->y)*
                      left->width+j-left->x)+k));
 
-                  *(full->tex +(RGBA*((full->height-1-i-start_y)*
+                  *(full->tex +(RGBA*((i+start_y)*
                      full->width+j+start_x+screen_x)+k)) =
-                     *(right->tex + (RGBA*((right->height-1-i+right->y)*
+                     *(right->tex + (RGBA*((i-right->y)*
                      right->width+j-right->x)+k));
 
                }

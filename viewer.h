@@ -28,7 +28,7 @@
 
 #define MAJOR 0
 #define MINOR 7
-#define PATCH 2
+#define PATCH 3
 
 #define RGB 3
 #define RGBA 4
@@ -55,12 +55,28 @@ typedef struct TEXTURE {
    struct TEXTURE *thumb;
 } TEXTURE;
 
+/* defines each pair in a slideshow */
+typedef struct PAIR {
+   char *left_file;
+   char *right_file;
+   int x_offset;
+   int y_offset;
+   struct PAIR *next;
+   struct PAIR *prev;
+} PAIR;
+
+/* a list of pairs */
+typedef struct PAIRLIST {
+   PAIR *head;
+   PAIR *tail;
+   PAIR *cur;
+   int num;
+} PAIRLIST;
+
 /* global variables */
 extern int first_time;
 extern int screen_x;
 extern int screen_y;
-extern int offset_x;
-extern int offset_y;
 extern TEXTURE *left;
 extern TEXTURE *right;
 extern TEXTURE *full;
@@ -76,6 +92,10 @@ extern int mousex1;
 extern int mousey1;
 extern int fine_align;
 extern int thumb_size;
+extern int nothumb;
+extern int x_offset;
+extern int y_offset;
+extern PAIRLIST *list;
 
 /* function prototypes for viewer */
 void displayFuncView(void); /* the display function (for viewer) */
@@ -121,10 +141,23 @@ TEXTURE *makeThumb(TEXTURE *);
 int isjpeg(char *);
 void drawBox(int, int, int, int, int *color, int);
 void drawFilledBox(int, int, int, int, int *color, int);
+void readPair(PAIR *);
+void readFileList(char *, PAIRLIST **);
+void getNextPair(PAIRLIST *);
+void getPrevPair(PAIRLIST *);
+void freeTexture(TEXTURE **);
 
 /* function prototypes for example */
 TEXTURE *read_JPEG_file (char *);
 void write_JPEG_file(char *, int, TEXTURE *);
 void readAndSplit(char *);
 
+/* function prototypes for list */
+extern PAIR *newPair(char *, char *);
+extern void addPair(PAIR *, PAIRLIST **);
+extern void removePair(PAIR *, PAIRLIST **);
+extern void deletePair(PAIR *, PAIRLIST **);
+extern void freeList(PAIRLIST **);
+extern void initList(PAIRLIST **);
+extern void freePair(PAIR *);
 

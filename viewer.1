@@ -1,4 +1,4 @@
-.TH VIEWER 1 "June 20 2002"
+.TH VIEWER 1 "July 21 2002"
 .SH NAME
 viewer \- stereo pair viewer/aligner
 .SH SYNOPSIS
@@ -117,37 +117,54 @@ dragging will move both images.
 .SH OPTIONS
 The options are:
 .TP
-.BI \-h
+.BI \-h,\ --help
 Display usage and version information and exit
 .TP
-.BI \-i \ [leftimage.ppm\ rightimage.ppm]
+.BI \-i,\ --input \ [leftimage.ppm\ rightimage.ppm]
 Display a pair of images in viewer mode
 .TP
-.BI \-v \ [fullimage.ppm]
+.BI \-v,\ --view \ [fullimage.ppm]
 Display a combined pair of images in viewer mode. assumes left half of 
 image is left eye image and right half of image is right eye image.
 .TP
-.BI \-m \ [monoimage.ppm]
+.BI \-m,\ --mono \ [monoimage.ppm]
 Display a mono image in viewer mode
 .TP
-.BI \-a \ [leftinfile.ppm\ rightinfile.ppm]
+.BI \-a,\ --align \ [leftinfile.ppm\ rightinfile.ppm]
 Display a pair of images in aligner mode
 .TP
-.BI \-o \ [fulloutfile.ppm]
+.BI \-o,\ --output \ [fulloutfile.ppm]
 Specify the output file for a joined stereo pair. Default value is 
 fullout.ppm. This option is only useful in aligner mode.
 .TP
-.BI \-l \ [leftoutfile.ppm]
+.BI \-l,\ --left \ [leftoutfile.ppm]
 Specify the output file for the left half of a stereo pair. Default
 value is leftout.ppm. This option is only useful in aligner mode.
 .TP
-.BI \-r \ [rightoutfile.ppm]
+.BI \-r,\ --right \ [rightoutfile.ppm]
 Specify the output file for the right half of a stereo pair. Default
 value is rightout.ppm. This option is only useful in aligner mode.
 .TP
-.BI \-g \ [WIDTHxHEIGHT]
+.BI \-g,\ --geom \ [WIDTH]x[HEIGHT]
 Forces viewer to use a specified window geometry. The default 
 behavior is to cover the entire desktop.
+.TP
+.BI \-x,\ --off \ [x_offset][y_offset]
+Specifies the offset of the right hand image relative to the left hand 
+image. this option should only be used AFTER a filename has been 
+specified on teh command line (ie: viewer -i left.ppm right.ppm -x 
+-2+4).
+.TP
+.BI \-n,\ --nothumb
+Disables thumbnail view
+.TP
+.BI \-f,\ --file \ [filename]
+Specifies a file which contains a list with four entries per line, the 
+first representing the filename of the left hand image, the second 
+representing the filename of the right hand image, the third 
+representing the x offset of the right image and the fourth representing 
+the y offset of the right image. The 'n' (or next) and 'p' (or prev) 
+keys can be used to view multiple pairs as a slideshow.
 
 .SH viewer mode commands
 these are the commands available while in viewer mode:
@@ -164,6 +181,12 @@ zoom out
 .TP
 .BI z
 zoom in
+.TP
+.BI n
+next image
+.TP
+.BI p
+previous image
 .TP
 .BI c
 center images
@@ -201,6 +224,12 @@ these are the commands available in aligner mode:
 .TP
 .BI q,\ ESC
 quit
+.TP
+.BI n
+next image
+.TP
+.BI p
+previous image
 .TP
 .BI ENTER
 crop images to screen and write left, right, and joined images
@@ -262,14 +291,31 @@ this will read a single image in mono viewer mode.
 will load the specified pair in viewer mode in a window covering the
 upper half of a 1024x768 desktop.
 
+	viewer -i left1.ppm right1.ppm -off +3-5 --input left2.ppm right2.ppm -i left3.ppm right3.ppm -x -3+0
+
+this will load a series of three images for a slideshow. the first and 
+third are not quite aligned so an offset is speciified, but the second 
+pair is already aligned so no offset information is necessary. note that 
+the offset option applies to the PREVIOUS file input option.
+
+	viewer -f slideshow
+
+this will load a series of images with the filenames and offets being 
+taken from the file. each line of the file should contain exactly four 
+items: left image name, right image name, x offset, y offset. these 
+items are separated by spaces and all four options must be present. 
+comments may be inserted into the file for better readability by using a 
+# sign at the start of a line. blank lines will also be ignored.
+
 .SH ENVIRONMENT
 .TP
 No special environment variables.
 .SH LICENSE
 This software is covered under the GNU Public License as outlined in the
 COPYING file included with this distribution.
-.SH AUTHOR
-Russ Burdick <wburdick@cs.umn.edu>
+.SH AUTHORS
+Russ Burdick <wburdick@cs.umn.edu>, with contributions from Nathan Weeks 
+<weeks@usgs.gov>.
 .SH BUGS
 No known bugs at this time. Please send bug reports to the author.
 .PP

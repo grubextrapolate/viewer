@@ -149,6 +149,18 @@ void keyboardFuncView(unsigned char key, int x, int y) {
    else debug("\n");
 
    switch(key) {
+      case 'n': /* next pair */
+      case 'N':
+      case ' ':
+         getNextPair(list);
+         glutPostRedisplay();
+         break;
+      case 'p': /* prev pair */
+      case 'P':
+      case 8: /* backspace */
+         getPrevPair(list);
+         glutPostRedisplay();
+         break;
       case 'z': /* zoom in */
       case 'Z':
          zoom++;
