@@ -68,30 +68,34 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 AMTAR = @AMTAR@
 AWK = @AWK@
 CC = @CC@
-CFLAGS = @CFLAGS@
 DEPDIR = @DEPDIR@
-EXTRALIBS = @EXTRALIBS@
-INCDIRS = @INCDIRS@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-LDFLAGS = @LDFLAGS@
-LIBDIRS = @LIBDIRS@
-LIBS = @LIBS@
 MAINT = @MAINT@
 OS_TYPE = @OS_TYPE@
 PACKAGE = @PACKAGE@
 STRIP = @STRIP@
 VERSION = @VERSION@
+VIEWER_CFLAGS = @VIEWER_CFLAGS@
+VIEWER_EXTRALIBS = @VIEWER_EXTRALIBS@
+VIEWER_INCDIRS = @VIEWER_INCDIRS@
+VIEWER_LDFLAGS = @VIEWER_LDFLAGS@
+VIEWER_LIBDIRS = @VIEWER_LIBDIRS@
+VIEWER_LIBS = @VIEWER_LIBS@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
+
 bin_PROGRAMS = viewer
-viewer_SOURCES = viewer.c align.c main.c mono.c list.c shared.c
+viewer_SOURCES = viewer.c align.c main.c mono.c list.c shared.c viewer.h
 man_MANS = viewer.1
-viewer_LDFLAGS = @EXTRALIBS@
-viewer_LDADD = @LIBDIRS@ @LDFLAGS@
+data_DATA = AUTHORS COPYING ChangeLog INSTALL NEWS README
+
 @DEBUG_ENABLE_TRUE@DEBUG = -DDEBUG -g
 @DEBUG_ENABLE_FALSE@DEBUG = 
-viewer_CFLAGS = @CFLAGS@ @INCDIRS@ -DOS_@OS_TYPE@ ${DEBUG}
+
+LDFLAGS = @VIEWER_EXTRALIBS@
+LDADD = @VIEWER_LIBDIRS@ @VIEWER_LDFLAGS@
+CFLAGS = @VIEWER_INCDIRS@ -DOS_@OS_TYPE@ ${DEBUG}
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -99,23 +103,22 @@ CONFIG_CLEAN_FILES =
 bin_PROGRAMS = viewer$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
-am_viewer_OBJECTS = viewer-viewer.$(OBJEXT) viewer-align.$(OBJEXT) \
-	viewer-main.$(OBJEXT) viewer-mono.$(OBJEXT) \
-	viewer-list.$(OBJEXT) viewer-shared.$(OBJEXT)
+am_viewer_OBJECTS = viewer.$(OBJEXT) align.$(OBJEXT) main.$(OBJEXT) \
+	mono.$(OBJEXT) list.$(OBJEXT) shared.$(OBJEXT)
 viewer_OBJECTS = $(am_viewer_OBJECTS)
+viewer_LDADD = $(LDADD)
 viewer_DEPENDENCIES =
+viewer_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir)
 CPPFLAGS = @CPPFLAGS@
+LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/viewer-align.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/viewer-list.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/viewer-main.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/viewer-mono.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/viewer-shared.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/viewer-viewer.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/align.Po ./$(DEPDIR)/list.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/main.Po ./$(DEPDIR)/mono.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/shared.Po ./$(DEPDIR)/viewer.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -124,6 +127,8 @@ DIST_SOURCES = $(viewer_SOURCES)
 
 NROFF = nroff
 MANS = $(man_MANS)
+DATA = $(data_DATA)
+
 DIST_COMMON = README AUTHORS COPYING ChangeLog INSTALL Makefile.am \
 	Makefile.in NEWS aclocal.m4 compile config.guess config.sub \
 	configure configure.in depcomp install-sh missing mkinstalldirs
@@ -173,12 +178,6 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-viewer-viewer.$(OBJEXT): viewer.c
-viewer-align.$(OBJEXT): align.c
-viewer-main.$(OBJEXT): main.c
-viewer-mono.$(OBJEXT): mono.c
-viewer-list.$(OBJEXT): list.c
-viewer-shared.$(OBJEXT): shared.c
 viewer$(EXEEXT): $(viewer_OBJECTS) $(viewer_DEPENDENCIES) 
 	@rm -f viewer$(EXEEXT)
 	$(LINK) $(viewer_LDFLAGS) $(viewer_OBJECTS) $(viewer_LDADD) $(LIBS)
@@ -189,12 +188,12 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/viewer-align.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/viewer-list.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/viewer-main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/viewer-mono.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/viewer-shared.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/viewer-viewer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/align.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mono.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shared.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/viewer.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)
@@ -210,78 +209,6 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(COMPILE) -c `cygpath -w $<`
-
-viewer-viewer.o: viewer.c
-@AMDEP_TRUE@	source='viewer.c' object='viewer-viewer.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/viewer-viewer.Po' tmpdepfile='$(DEPDIR)/viewer-viewer.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(viewer_CFLAGS) $(CFLAGS) -c -o viewer-viewer.o `test -f 'viewer.c' || echo '$(srcdir)/'`viewer.c
-
-viewer-viewer.obj: viewer.c
-@AMDEP_TRUE@	source='viewer.c' object='viewer-viewer.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/viewer-viewer.Po' tmpdepfile='$(DEPDIR)/viewer-viewer.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(viewer_CFLAGS) $(CFLAGS) -c -o viewer-viewer.obj `cygpath -w viewer.c`
-
-viewer-align.o: align.c
-@AMDEP_TRUE@	source='align.c' object='viewer-align.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/viewer-align.Po' tmpdepfile='$(DEPDIR)/viewer-align.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(viewer_CFLAGS) $(CFLAGS) -c -o viewer-align.o `test -f 'align.c' || echo '$(srcdir)/'`align.c
-
-viewer-align.obj: align.c
-@AMDEP_TRUE@	source='align.c' object='viewer-align.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/viewer-align.Po' tmpdepfile='$(DEPDIR)/viewer-align.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(viewer_CFLAGS) $(CFLAGS) -c -o viewer-align.obj `cygpath -w align.c`
-
-viewer-main.o: main.c
-@AMDEP_TRUE@	source='main.c' object='viewer-main.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/viewer-main.Po' tmpdepfile='$(DEPDIR)/viewer-main.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(viewer_CFLAGS) $(CFLAGS) -c -o viewer-main.o `test -f 'main.c' || echo '$(srcdir)/'`main.c
-
-viewer-main.obj: main.c
-@AMDEP_TRUE@	source='main.c' object='viewer-main.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/viewer-main.Po' tmpdepfile='$(DEPDIR)/viewer-main.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(viewer_CFLAGS) $(CFLAGS) -c -o viewer-main.obj `cygpath -w main.c`
-
-viewer-mono.o: mono.c
-@AMDEP_TRUE@	source='mono.c' object='viewer-mono.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/viewer-mono.Po' tmpdepfile='$(DEPDIR)/viewer-mono.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(viewer_CFLAGS) $(CFLAGS) -c -o viewer-mono.o `test -f 'mono.c' || echo '$(srcdir)/'`mono.c
-
-viewer-mono.obj: mono.c
-@AMDEP_TRUE@	source='mono.c' object='viewer-mono.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/viewer-mono.Po' tmpdepfile='$(DEPDIR)/viewer-mono.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(viewer_CFLAGS) $(CFLAGS) -c -o viewer-mono.obj `cygpath -w mono.c`
-
-viewer-list.o: list.c
-@AMDEP_TRUE@	source='list.c' object='viewer-list.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/viewer-list.Po' tmpdepfile='$(DEPDIR)/viewer-list.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(viewer_CFLAGS) $(CFLAGS) -c -o viewer-list.o `test -f 'list.c' || echo '$(srcdir)/'`list.c
-
-viewer-list.obj: list.c
-@AMDEP_TRUE@	source='list.c' object='viewer-list.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/viewer-list.Po' tmpdepfile='$(DEPDIR)/viewer-list.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(viewer_CFLAGS) $(CFLAGS) -c -o viewer-list.obj `cygpath -w list.c`
-
-viewer-shared.o: shared.c
-@AMDEP_TRUE@	source='shared.c' object='viewer-shared.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/viewer-shared.Po' tmpdepfile='$(DEPDIR)/viewer-shared.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(viewer_CFLAGS) $(CFLAGS) -c -o viewer-shared.o `test -f 'shared.c' || echo '$(srcdir)/'`shared.c
-
-viewer-shared.obj: shared.c
-@AMDEP_TRUE@	source='shared.c' object='viewer-shared.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/viewer-shared.Po' tmpdepfile='$(DEPDIR)/viewer-shared.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(viewer_CFLAGS) $(CFLAGS) -c -o viewer-shared.obj `cygpath -w shared.c`
 CCDEPMODE = @CCDEPMODE@
 uninstall-info-am:
 
@@ -326,6 +253,24 @@ uninstall-man1:
 	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
 	  echo " rm -f $(DESTDIR)$(man1dir)/$$inst"; \
 	  rm -f $(DESTDIR)$(man1dir)/$$inst; \
+	done
+dataDATA_INSTALL = $(INSTALL_DATA)
+install-dataDATA: $(data_DATA)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(datadir)
+	@list='$(data_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " $(dataDATA_INSTALL) $$d$$p $(DESTDIR)$(datadir)/$$f"; \
+	  $(dataDATA_INSTALL) $$d$$p $(DESTDIR)$(datadir)/$$f; \
+	done
+
+uninstall-dataDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(data_DATA)'; for p in $$list; do \
+	  f="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(datadir)/$$f"; \
+	  rm -f $(DESTDIR)$(datadir)/$$f; \
 	done
 
 ETAGS = etags
@@ -453,10 +398,10 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS) $(MANS)
+all-am: Makefile $(PROGRAMS) $(MANS) $(DATA)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(bindir) $(DESTDIR)$(man1dir)
+	$(mkinstalldirs) $(DESTDIR)$(bindir) $(DESTDIR)$(man1dir) $(DESTDIR)$(datadir)
 
 install: install-am
 install-exec: install-exec-am
@@ -499,7 +444,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-man
+install-data-am: install-dataDATA install-man
 
 install-exec-am: install-binPROGRAMS
 
@@ -518,7 +463,8 @@ mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic
 
-uninstall-am: uninstall-binPROGRAMS uninstall-info-am uninstall-man
+uninstall-am: uninstall-binPROGRAMS uninstall-dataDATA uninstall-info-am \
+	uninstall-man
 
 uninstall-man: uninstall-man1
 
@@ -527,14 +473,17 @@ uninstall-man: uninstall-man1
 	distclean-compile distclean-depend distclean-generic \
 	distclean-tags distcleancheck distdir dvi dvi-am info info-am \
 	install install-am install-binPROGRAMS install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-man1 install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am uninstall-man \
-	uninstall-man1
+	install-data-am install-dataDATA install-exec install-exec-am \
+	install-info install-info-am install-man install-man1 \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-dataDATA \
+	uninstall-info-am uninstall-man uninstall-man1
 
+
+mac: viewer mac.r
+	/Developer/Tools/Rez -t APPL -o viewer mac.r
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

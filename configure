@@ -270,7 +270,7 @@ PACKAGE_VERSION='0.7.4'
 PACKAGE_STRING='viewer 0.7.4'
 PACKAGE_BUGREPORT=''
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE CPP EGREP DEBUG_ENABLE_TRUE DEBUG_ENABLE_FALSE OS_TYPE EXTRALIBS LIBDIRS INCDIRS INSTALL LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE CPP EGREP DEBUG_ENABLE_TRUE DEBUG_ENABLE_FALSE OS_TYPE VIEWER_CFLAGS VIEWER_LIBS VIEWER_EXTRALIBS VIEWER_LDFLAGS VIEWER_LIBDIRS VIEWER_INCDIRS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3710,79 +3710,62 @@ else
 fi
 
 
-CFLAGS=
-LIBS=
-LIBDIRS=
-LDFLAGS=
-INCDIRS=
-EXTRALIBS=
+VIEWER_CFLAGS=
+VIEWER_LIBS=
+VIEWER_LIBDIRS=
+VIEWER_LDFLAGS=
+VIEWER_INCDIRS=
+VIEWER_EXTRALIBS=
 
 case $host in
   *-*-linux*)
-    LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
-    LDFLAGS="-O2"
-    LIBDIRS="-L/usr/X11R6/lib"
-    EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
-    INCDIRS="-I/usr/X11R6/include"
-    CFLAGS="-Wall -O2"
+    VIEWER_LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
+    VIEWER_LDFLAGS="-O2"
+    VIEWER_LIBDIRS="-L/usr/X11R6/lib"
+    VIEWER_EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
+    VIEWER_INCDIRS="-I/usr/X11R6/include"
+    VIEWER_CFLAGS="-Wall -O2"
     OS_TYPE="Linux"
     ;;
 
-  FreeBSD)
-    LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
-    LDFLAGS="-O2"
-    LIBDIRS="-L/usr/X11R6/lib"
-    EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
-    INCDIRS="-I/usr/X11R6/include"
-    CFLAGS="-Wall -O2"
+  *-*-freebsd*|*-*-openbsd*|*-*-netbsd*)
+    VIEWER_LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
+    VIEWER_LDFLAGS="-O2"
+    VIEWER_LIBDIRS="-L/usr/X11R6/lib"
+    VIEWER_EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
+    VIEWER_INCDIRS="-I/usr/X11R6/include"
+    VIEWER_CFLAGS="-Wall -O2"
     OS_TYPE="BSD"
     ;;
 
-  OpenBSD)
-    LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
-    LDFLAGS="-O2"
-    LIBDIRS="-L/usr/X11R6/lib"
-    EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
-    INCDIRS="-I/usr/X11R6/include"
-    CFLAGS="-Wall -O2"
-    OS_TYPE="BSD"
+  *-*-solaris*|*-*-sunos*)
+    VIEWER_LIBS="-lMesaglut -lMesaGLU  -lMesaGL -lXext -lXi -lXmu -lX11 -lsocket -lm"
+    VIEWER_LIBDIRS="-L/soft/X11R6.3/lib"
+    VIEWER_EXTRALIBS="-R/soft/X11R6.3/lib"
+    VIEWER_INCDIRS="-I/soft/X11R6.3/include"
+    VIEWER_CFLAGS="-xO5 -Dinline="
+    OS_TYPE="Solaris"
     ;;
 
-  NetBSD)
-    LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
-    LDFLAGS="-O2"
-    LIBDIRS="-L/usr/X11R6/lib"
-    EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
-    INCDIRS="-I/usr/X11R6/include"
-    CFLAGS="-Wall -O2"
-    OS_TYPE="BSD"
-    ;;
-
-  SunOS)
-    LIBS="-lMesaglut -lMesaGLU  -lMesaGL -lXext -lXi -lXmu -lX11 -lsocket -lm"
-    LIBDIRS="-L/soft/X11R6.3/lib"
-    EXTRALIBS="-R/soft/X11R6.3/lib"
-    INCDIRS="-I/soft/X11R6.3/include"
-    CFLAGS="-xO5 -Dinline="
-    ;;
-
-  IRIX)
-    LDFLAGS="-Ofast=ip22_4k -lglut -lGLU -lGL -lXmu -lX11 -lm"
-    CFLAGS="-Ofast=ip22_4k -Dinline="
+  *-*-irix*)
+    VIEWER_LDFLAGS="-Ofast=ip22_4k -lglut -lGLU -lGL -lXmu -lX11 -lm"
+    VIEWER_CFLAGS="-Ofast=ip22_4k -Dinline="
+    OS_TYPE="IRIX"
     ;;
 
   IRIX_gcc)
-    LDFLAGS="-lglut -lGLU -lGL -lXmu -lX11 -lm"
-    CFLAGS="-O2 -Dinline="
+    VIEWER_LDFLAGS="-lglut -lGLU -lGL -lXmu -lX11 -lm"
+    VIEWER_CFLAGS="-O2 -Dinline="
+    OS_TYPE="IRIX"
     ;;
 
   *-*-darwin*)
+    VIEWER_LIBS="-lobjc -lm"
+    VIEWER_LDFLAGS="-O3"
+    VIEWER_EXTRALIBS="-framework GLUT -framework OpenGL"
+    VIEWER_INCDIRS="-I/System/Library/Frameworks/GLUT.framework/Headers -I/System/Library/Frameworks/OpenGL.framework/Headers"
+    VIEWER_CFLAGS="-O3"
     OS_TYPE="Darwin"
-    LIBS="-lobjc -lm"
-    LDFLAGS="-O3"
-    EXTRALIBS="-framework GLUT -framework OpenGL"
-    INCDIRS="-I/System/Library/Frameworks/GLUT.framework/Headers -I/System/Library/Frameworks/OpenGL.framework/Headers"
-    CFLAGS="-O3"
     ;;
 
   *)
@@ -3790,8 +3773,6 @@ case $host in
     ;;
 
 esac
-
-
 
 
 
@@ -4516,10 +4497,12 @@ s,@EGREP@,$EGREP,;t t
 s,@DEBUG_ENABLE_TRUE@,$DEBUG_ENABLE_TRUE,;t t
 s,@DEBUG_ENABLE_FALSE@,$DEBUG_ENABLE_FALSE,;t t
 s,@OS_TYPE@,$OS_TYPE,;t t
-s,@EXTRALIBS@,$EXTRALIBS,;t t
-s,@LIBDIRS@,$LIBDIRS,;t t
-s,@INCDIRS@,$INCDIRS,;t t
-s,@INSTALL@,$INSTALL,;t t
+s,@VIEWER_CFLAGS@,$VIEWER_CFLAGS,;t t
+s,@VIEWER_LIBS@,$VIEWER_LIBS,;t t
+s,@VIEWER_EXTRALIBS@,$VIEWER_EXTRALIBS,;t t
+s,@VIEWER_LDFLAGS@,$VIEWER_LDFLAGS,;t t
+s,@VIEWER_LIBDIRS@,$VIEWER_LIBDIRS,;t t
+s,@VIEWER_INCDIRS@,$VIEWER_INCDIRS,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF

@@ -34,79 +34,62 @@ AC_ARG_ENABLE(debug,
 esac],[debug=false])
 AM_CONDITIONAL(DEBUG_ENABLE, test x$debug = xtrue)
 
-CFLAGS=
-LIBS=
-LIBDIRS=
-LDFLAGS=
-INCDIRS=
-EXTRALIBS=
+VIEWER_CFLAGS=
+VIEWER_LIBS=
+VIEWER_LIBDIRS=
+VIEWER_LDFLAGS=
+VIEWER_INCDIRS=
+VIEWER_EXTRALIBS=
 
 case $host in
   *-*-linux*)
-    LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
-    LDFLAGS="-O2"
-    LIBDIRS="-L/usr/X11R6/lib"
-    EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
-    INCDIRS="-I/usr/X11R6/include"
-    CFLAGS="-Wall -O2"
+    VIEWER_LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
+    VIEWER_LDFLAGS="-O2"
+    VIEWER_LIBDIRS="-L/usr/X11R6/lib"
+    VIEWER_EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
+    VIEWER_INCDIRS="-I/usr/X11R6/include"
+    VIEWER_CFLAGS="-Wall -O2"
     OS_TYPE="Linux"
     ;;
 
-  FreeBSD)
-    LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
-    LDFLAGS="-O2"
-    LIBDIRS="-L/usr/X11R6/lib"
-    EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
-    INCDIRS="-I/usr/X11R6/include"
-    CFLAGS="-Wall -O2"
+  *-*-freebsd*|*-*-openbsd*|*-*-netbsd*)
+    VIEWER_LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
+    VIEWER_LDFLAGS="-O2"
+    VIEWER_LIBDIRS="-L/usr/X11R6/lib"
+    VIEWER_EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
+    VIEWER_INCDIRS="-I/usr/X11R6/include"
+    VIEWER_CFLAGS="-Wall -O2"
     OS_TYPE="BSD"
     ;;
 
-  OpenBSD)
-    LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
-    LDFLAGS="-O2"
-    LIBDIRS="-L/usr/X11R6/lib"
-    EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
-    INCDIRS="-I/usr/X11R6/include"
-    CFLAGS="-Wall -O2"
-    OS_TYPE="BSD"
+  *-*-solaris*|*-*-sunos*)
+    VIEWER_LIBS="-lMesaglut -lMesaGLU  -lMesaGL -lXext -lXi -lXmu -lX11 -lsocket -lm"
+    VIEWER_LIBDIRS="-L/soft/X11R6.3/lib"
+    VIEWER_EXTRALIBS="-R/soft/X11R6.3/lib"
+    VIEWER_INCDIRS="-I/soft/X11R6.3/include"
+    VIEWER_CFLAGS="-xO5 -Dinline="
+    OS_TYPE="Solaris"
     ;;
 
-  NetBSD)
-    LIBS="-lglut -lGLU -lGL -lXi -lXmu -lXext -lXt -lX11 -lICE -lSM -lm"
-    LDFLAGS="-O2"
-    LIBDIRS="-L/usr/X11R6/lib"
-    EXTRALIBS="-Xlinker -rpath /usr/X11R6/lib"
-    INCDIRS="-I/usr/X11R6/include"
-    CFLAGS="-Wall -O2"
-    OS_TYPE="BSD"
-    ;;
-
-  SunOS)
-    LIBS="-lMesaglut -lMesaGLU  -lMesaGL -lXext -lXi -lXmu -lX11 -lsocket -lm"
-    LIBDIRS="-L/soft/X11R6.3/lib"
-    EXTRALIBS="-R/soft/X11R6.3/lib"
-    INCDIRS="-I/soft/X11R6.3/include"
-    CFLAGS="-xO5 -Dinline="
-    ;;
-
-  IRIX)
-    LDFLAGS="-Ofast=ip22_4k -lglut -lGLU -lGL -lXmu -lX11 -lm"
-    CFLAGS="-Ofast=ip22_4k -Dinline="
+  *-*-irix*)
+    VIEWER_LDFLAGS="-Ofast=ip22_4k -lglut -lGLU -lGL -lXmu -lX11 -lm"
+    VIEWER_CFLAGS="-Ofast=ip22_4k -Dinline="
+    OS_TYPE="IRIX"
     ;;
 
   IRIX_gcc)
-    LDFLAGS="-lglut -lGLU -lGL -lXmu -lX11 -lm"
-    CFLAGS="-O2 -Dinline="
+    VIEWER_LDFLAGS="-lglut -lGLU -lGL -lXmu -lX11 -lm"
+    VIEWER_CFLAGS="-O2 -Dinline="
+    OS_TYPE="IRIX"
     ;;
 
   *-*-darwin*)
+    VIEWER_LIBS="-lobjc -lm"
+    VIEWER_LDFLAGS="-O3"
+    VIEWER_EXTRALIBS="-framework GLUT -framework OpenGL"
+    VIEWER_INCDIRS="-I/System/Library/Frameworks/GLUT.framework/Headers -I/System/Library/Frameworks/OpenGL.framework/Headers"
+    VIEWER_CFLAGS="-O3"
     OS_TYPE="Darwin"
-    LIBS="-lobjc -lm"
-    LDFLAGS="-O3"
-    EXTRALIBS="-framework GLUT -framework OpenGL"
-    INCDIRS="-I/System/Library/Frameworks/GLUT.framework/Headers -I/System/Library/Frameworks/OpenGL.framework/Headers"
-    CFLAGS="-O3"
     ;;
 
   *)
@@ -116,13 +99,12 @@ case $host in
 esac
 
 AC_SUBST(OS_TYPE)
-AC_SUBST(CC)
-AC_SUBST(CFLAGS)
-AC_SUBST(LIBS)
-AC_SUBST(EXTRALIBS)
-AC_SUBST(LDFLAGS)
-AC_SUBST(LIBDIRS)
-AC_SUBST(INCDIRS)
-AC_SUBST(INSTALL)
+AC_SUBST(VIEWER_CFLAGS)
+AC_SUBST(VIEWER_LIBS)
+AC_SUBST(VIEWER_EXTRALIBS)
+AC_SUBST(VIEWER_LDFLAGS)
+AC_SUBST(VIEWER_LIBDIRS)
+AC_SUBST(VIEWER_INCDIRS)
+dnl AC_SUBST(INSTALL)
 
 AC_OUTPUT(Makefile)
