@@ -849,10 +849,12 @@ boxy);
       if (thumb->thumb->tex != NULL) {
          if (clone) {
             if (eye == LEFT) {
-               glDrawBuffer(GL_LEFT);
+               glDrawBuffer(GL_BACK_LEFT);
             } else { /* (eye == RIGHT) */
-               glDrawBuffer(GL_RIGHT);
+               glDrawBuffer(GL_BACK_RIGHT);
             }
+         } else {
+            glDrawBuffer(GL_BACK);
          }
          glRasterPos2i(x, y);
          glDrawPixels(thumb->thumb->width, thumb->thumb->height, GL_RGBA, 
@@ -889,10 +891,12 @@ void drawBox(int x, int y, int w, int h, int *color, int eye) {
 
    if (clone) {
       if (eye == LEFT) {
-         glDrawBuffer(GL_LEFT);
+         glDrawBuffer(GL_BACK_LEFT);
       } else { /* (eye == RIGHT) */
-         glDrawBuffer(GL_RIGHT);
+         glDrawBuffer(GL_BACK_RIGHT);
       }
+   } else {
+      glDrawBuffer(GL_BACK);
    }
 
    /* check boundary to make sure box stays on correct eye */
@@ -971,10 +975,12 @@ void drawFilledBox(int x, int y, int w, int h, int *color, int eye) {
 
    if (clone) {
       if (eye == LEFT) {
-         glDrawBuffer(GL_LEFT);
+         glDrawBuffer(GL_BACK_LEFT);
       } else { /* (eye == RIGHT) */
-         glDrawBuffer(GL_RIGHT);
+         glDrawBuffer(GL_BACK_RIGHT);
       }
+   } else {
+      glDrawBuffer(GL_BACK);
    }
 
    /* check boundary to make sure box stays on correct eye */

@@ -24,6 +24,7 @@ void displayFuncAlign(void) {
 
       /* at least one edge showing, so blank */
       debug("displayFuncAlign: blanking screen\n");
+      glDrawBuffer(GL_BACK);
       glClear(GL_COLOR_BUFFER_BIT);
 
    } else { /* no edges showing, dont blank */
@@ -44,11 +45,12 @@ void displayFuncAlign(void) {
 
       for (i = 0; i < h; i++) {
          if (clone) {
-            glDrawBuffer(GL_LEFT);
+            glDrawBuffer(GL_BACK_LEFT);
             glRasterPos2i(rx, ry + i);
             glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                          left->tex+off);
          } else {
+            glDrawBuffer(GL_BACK);
             glRasterPos2i(rx, ry + i);
             glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                          left->tex+off);
@@ -71,11 +73,12 @@ void displayFuncAlign(void) {
 
       for (i = 0; i < h; i++) {
          if (clone) {
-            glDrawBuffer(GL_RIGHT);
+            glDrawBuffer(GL_BACK_RIGHT);
             glRasterPos2i(rx, ry + i);
             glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                          right->tex+off);
          } else {
+            glDrawBuffer(GL_BACK);
             glRasterPos2i(rx+screen_x, ry + i);
             glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                          right->tex+off);

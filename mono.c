@@ -28,9 +28,11 @@ void displayFuncViewMono(void) {
 
             /* at least one edge showing, so blank */
             debug("displayFuncViewMono: blanking screen\n");
+            glDrawBuffer(GL_BACK);
             glClear(GL_COLOR_BUFFER_BIT);
 
          } else { /* no edges showing, dont blank */
+            glDrawBuffer(GL_BACK);
             debug("displayFuncViewMono: no screen blank needed\n");
          }
 
@@ -62,9 +64,11 @@ void displayFuncViewMono(void) {
 
             /* at least one edge showing, so blank */
             debug("displayFuncViewMono: blanking screen\n");
+            glDrawBuffer(GL_BACK);
             glClear(GL_COLOR_BUFFER_BIT);
 
          } else { /* no edges showing, dont blank */
+            glDrawBuffer(GL_BACK);
             debug("displayFuncViewMono: no screen blank needed\n");
          }
 

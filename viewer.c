@@ -34,11 +34,12 @@ void displayFuncView(void) {
          debug("displayFuncView: blanking screen\n");
 
          if (clone) {
-            glDrawBuffer(GL_LEFT);
+            glDrawBuffer(GL_BACK_LEFT);
             glClear(GL_COLOR_BUFFER_BIT);
-            glDrawBuffer(GL_RIGHT);
+            glDrawBuffer(GL_BACK_RIGHT);
             glClear(GL_COLOR_BUFFER_BIT);
          } else {
+            glDrawBuffer(GL_BACK);
             glClear(GL_COLOR_BUFFER_BIT);
          }
       } else { /* no edges showing, dont blank */
@@ -59,7 +60,7 @@ void displayFuncView(void) {
 
          if (clone) {
             for (i = 0; i < h; i++) {
-               glDrawBuffer(GL_LEFT);
+               glDrawBuffer(GL_BACK_LEFT);
                glRasterPos2i(rx, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                             left->tex+off);
@@ -67,13 +68,14 @@ void displayFuncView(void) {
             }
          } else {
             for (i = 0; i < h; i++) {
+               glDrawBuffer(GL_BACK);
                glRasterPos2i(rx, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                             left->tex+off);
                off += r;
             }
          }
-         showPos(left, LEFT, NULL);
+//         showPos(left, LEFT, NULL);
       }
       if ((right->width >= 0) && (right->height >= 0)) {
 
@@ -89,18 +91,19 @@ void displayFuncView(void) {
 
          for (i = 0; i < h; i++) {
             if (clone) {
-               glDrawBuffer(GL_RIGHT);
+               glDrawBuffer(GL_BACK_RIGHT);
                glRasterPos2i(rx, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                             right->tex+off);
             } else {
+               glDrawBuffer(GL_BACK);
                glRasterPos2i(rx+screen_x, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                             right->tex+off);
             }
             off += r;
          }
-         showPos(right, RIGHT, NULL);
+//         showPos(right, RIGHT, NULL);
       }
 
    } else {
@@ -120,6 +123,7 @@ void displayFuncView(void) {
 
          /* at least one edge showing, so blank */
          debug("displayFuncView: blanking screen\n");
+         glDrawBuffer(GL_BACK);
          glClear(GL_COLOR_BUFFER_BIT);
 
       } else { /* no edges showing, dont blank */
@@ -139,18 +143,19 @@ void displayFuncView(void) {
 
          for (i = 0; i < h; i++) {
             if (clone) {
-               glDrawBuffer(GL_LEFT);
+               glDrawBuffer(GL_BACK_LEFT);
                glRasterPos2i(rx, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                             zleft->tex+off);
             } else {
+               glDrawBuffer(GL_BACK);
                glRasterPos2i(rx, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                             zleft->tex+off);
             }
             off += r;
          }
-         showPos(zleft, LEFT, left);
+//         showPos(zleft, LEFT, left);
       }
       if ((zright->width >= 0) && (zright->height >= 0)) {
          if (zright->x < 0) rx = 0;
@@ -165,18 +170,19 @@ void displayFuncView(void) {
 
          for (i = 0; i < h; i++) {
             if (clone) {
-               glDrawBuffer(GL_RIGHT);
+               glDrawBuffer(GL_BACK_RIGHT);
                glRasterPos2i(rx, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                             zright->tex+off);
             } else {
+               glDrawBuffer(GL_BACK);
                glRasterPos2i(rx+screen_x, ry + i);
                glDrawPixels(w, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                             zright->tex+off);
             }
             off += r;
          }
-         showPos(zright, RIGHT, right);
+//         showPos(zright, RIGHT, right);
       }
       free(zleft);
       free(zright);
