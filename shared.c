@@ -256,16 +256,13 @@ TEXTURE *read_texture(char *infilename) {
 
    } else { /* raw ppm */
 
-      ibuffer = (unsigned char *) malloc(img_height*img_width*3);
+      ibuffer = (unsigned char *)malloc(img_width*RGB);
       if (ibuffer == NULL) die("read_texture: error mallocing buffer\n");
 
-      fread(ibuffer, sizeof(unsigned char), img_height*img_width*RGB,
-            infile);
-      fclose(infile);
-
-      l = 0;
       /* read image data */
       for (i=0; i<img_height; i++) {
+         fread(ibuffer, sizeof(unsigned char), img_width*RGB, infile);
+         l = 0;
          for (j=0; j<img_width; j++) {
             for (k = 0; k < RGB; k++) {
                *(tex->tex + (RGB*((img_height-1-i)*img_width+j)+k)) =
@@ -275,6 +272,7 @@ TEXTURE *read_texture(char *infilename) {
       }
       free(ibuffer);
    }
+   fclose(infile);
 
    return tex;
 
