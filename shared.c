@@ -88,6 +88,22 @@ void getNextPair(PAIRLIST *list) {
             right->y = (screen_y - right->height)/2 + list->cur->y_offset;
             calcWindow(right);
          }
+      } else if (mode == AUTOVIEW) {
+         list->cur = list->head;
+
+         if (left != NULL) freeTexture(&left);
+         if (right != NULL) freeTexture(&right);
+         readPair(list->cur);
+
+         left->x = (screen_x - left->width)/2;
+         left->y = (screen_y - left->height)/2;
+         calcWindow(left);
+
+         if (list->cur->right_file != NULL) {
+            right->x = (screen_x - right->width)/2 + list->cur->x_offset;
+            right->y = (screen_y - right->height)/2 + list->cur->y_offset;
+            calcWindow(right);
+         }
       }
    }
 }
@@ -1002,7 +1018,7 @@ int stereoCheck() {
  * automatic switching function for slideshow mode
  */
 void slideshowFunc(int foo) {
-   if (list->cur != list->tail) {
+   if (list->cur != NULL) {
       getNextPair(list);
       glutPostRedisplay();
    }
