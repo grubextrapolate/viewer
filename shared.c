@@ -997,3 +997,14 @@ int stereoCheck() {
  
    return ret;
 }
+
+/*
+ * automatic switching function for slideshow mode
+ */
+void slideshowFunc(int foo) {
+   if (list->cur != list->tail) {
+      getNextPair(list);
+      glutPostRedisplay();
+   }
+   glutTimerFunc(1000*show_time, slideshowFunc, 0);
+}

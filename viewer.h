@@ -22,6 +22,7 @@
 #define ALIGN 0
 #define VIEWER 1
 #define MONOVIEW 2
+#define AUTOVIEW 3
 
 #ifndef TRUE
 #define TRUE 1
@@ -101,6 +102,7 @@ extern int mousex1;
 extern int mousey1;
 extern int fine_align;
 extern int thumb_size;
+extern int show_time;
 extern int nothumb;
 extern int nofac;
 extern int x_offset;
@@ -120,6 +122,7 @@ void keyboardFuncView(unsigned char, int, int); /* (for viewer) */
 void specialFuncView(int, int, int);
 void mouseFuncView(int, int, int, int);
 void motionFuncView(int, int);
+void slideshowFunc(int);
 
 /* function prototypes for mono viewer */
 void displayFuncViewMono(void); /* the display function (for viewer) */

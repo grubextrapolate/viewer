@@ -196,6 +196,11 @@ OPTIONS
               viewing modes, but if the window geometry is forced
               this option will be ignored.
 
+       -w, --show [time]
+              Starts  the  viewer in slideshow mode. this is just
+              viewer mode with  automatic  pair  switching  every
+              'time' seconds.
+
 viewer mode commands
        these  are  the  commands  available while in viewer mode.
        starting with version 0.8.0 this includes most of the com­

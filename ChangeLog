@@ -32,6 +32,8 @@
  bugfixes in this release.
 -added zoom percentage display and command line option to turn it off. 
  updated documentation to contain this info
+-added slideshow capability. specify '-w time' to switch every time 
+ seconds. updated documentation to include this info
 
 0.7.3:
 -fixed bug with cropping in aligner mode

@@ -29,6 +29,7 @@ int mode = VIEWER;
 
 double szoom = 0;
 int thumb_size = 100;
+int show_time = 5;
 
 TEXTURE *zoomLeft = NULL;
 TEXTURE *zoomRight = NULL;
@@ -149,7 +150,7 @@ int main(int argc, char **argv) {
       glShadeModel(GL_FLAT);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-   } else if (mode == VIEWER) { /* mode == VIEWER */
+   } else if ((mode == VIEWER) || (mode == AUTOVIEW)) { /* mode == VIEWER */
       debug("main: mode == VIEWER\n");
 
       glutDisplayFunc(displayFuncView);
@@ -199,6 +200,10 @@ int main(int argc, char **argv) {
       calcWindow(right);
    }
 
+   if (mode == AUTOVIEW) {
+      glutTimerFunc(1000*show_time, slideshowFunc, 0);
+   }
+
    glutMainLoop();
 
    return 0;
@@ -236,6 +241,7 @@ void showUsage() {
    printf("       -s, --stereo [enable hardware supported stereo]\n");
    printf("       -u, --fullscreen [enable fullscreen mode]\n");
    printf("       -p, --import <file(s)> [import the file(s) in viewer mode]\n");
+   printf("       -w, --show time [enter slideshow mode, rotating every 'time' seconds]\n");
    printf("\nmust contain either the -i, -v, -a, -m, -p, or -f options or only basename.\n");
    printf("if the -o, -l, or -r options are omitted default will be used\n");
    printf("\nsee manpage viewer(1) for further information\n\n");
@@ -311,6 +317,16 @@ void processArgs(int argc, char **argv) {
          if (i+1 < argc) {
             i++;
             thumb_size = atoi(argv[i]);
+         } else {
+            showUsage();
+            exit(-1);
+         }
+      } else if ((strcmp(argv[i], "-w") == 0) ||
+                 (strcmp(argv[i], "--show") == 0)) {
+         if (i+1 < argc) {
+            i++;
+            mode = AUTOVIEW;
+            show_time = atoi(argv[i]);
          } else {
             showUsage();
             exit(-1);
